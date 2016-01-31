@@ -1,0 +1,347 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [{
+        "Label": {
+          "default": "S3 Location"
+        },
+        "Parameters": ["CloudFrontAccessLogBucket"]
+      }, {
+        "Label": {
+          "default": "Rate-Based Blacklisting Parameters"
+        },
+        "Parameters": ["RequestThreshold", "WAFBlockPeriod", "WAFQuarantinePeriod"]
+      }],
+      "ParameterLabels": {
+        "CloudFrontAccessLogBucket": {
+          "default": "CloudFront Access Log Bucket Name"
+        },
+        "RequestThreshold": {
+          "default": "Request Threshold"
+        },
+        "WAFBlockPeriod": {
+          "default": "WAF Block Period"
+        },
+        "WAFQuarantinePeriod": {
+          "default": "WAF Quarantine Period"
+        }
+      }
+    }
+  },
+
+  "Parameters": {
+    "CloudFrontAccessLogBucket": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Enter the name of the bucket where the CloudFront files are stored. Rules for bucket naming: http://amzn.to/1QXbleZ"
+    },
+    "RequestThreshold": {
+      "Type": "Number",
+      "Default": "400",
+      "Description": "Enter the max acceptable request per minute per IP. Default: 400 requests per second"
+    },
+    "WAFBlockPeriod": {
+      "Type": "Number",
+      "Default": "14400",
+      "Description": "Enter for how long (in seconds) does the IP sloud be blocked. Default: 4 hours (144000 sec)"
+    },
+    "WAFQuarantinePeriod": {
+      "Type": "Number",
+      "Default": "14400",
+      "Description": "Enter for how long (in seconds) does the IP sloud be kept in quarentine. Default: 4 hours (144000 sec)"
+    }
+  },
+
+  "Resources": {
+    "WAFManualBlockSet": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": "Manual Block Set"
+      }
+    },
+    "WAFAutoBlockSet": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": "Auto Block Set"
+      }
+    },
+    "WAFAutoCountSet": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": "Auto Count Set"
+      }
+    },
+    "WAFManualBlockRule": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFManualBlockSet",
+      "Properties": {
+        "Name": "Manual Block Rule",
+        "MetricName": "ManualBlockRule",
+        "Predicates": [{
+          "DataId": {
+            "Ref": "WAFManualBlockSet"
+          },
+          "Negated": false,
+          "Type": "IPMatch"
+        }]
+      }
+    },
+    "WAFAutoBlockRule": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFAutoBlockSet",
+      "Properties": {
+        "Name": "Auto Block Rule",
+        "MetricName": "AutoBlockRule",
+        "Predicates": [{
+          "DataId": {
+            "Ref": "WAFAutoBlockSet"
+          },
+          "Negated": false,
+          "Type": "IPMatch"
+        }]
+      }
+    },
+    "WAFAutoCountRule": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFAutoCountSet",
+      "Properties": {
+        "Name": "Auto Count Rule",
+        "MetricName": "AutoCountRule",
+        "Predicates": [{
+          "DataId": {
+            "Ref": "WAFAutoCountSet"
+          },
+          "Negated": false,
+          "Type": "IPMatch"
+        }]
+      }
+    },
+    "WAFWebACL": {
+      "Type": "AWS::WAF::WebACL",
+      "DependsOn": ["WAFManualBlockRule", "WAFAutoBlockRule", "WAFAutoCountRule"],
+      "Properties": {
+        "Name": "Malicious Requesters",
+        "DefaultAction": {
+          "Type": "ALLOW"
+        },
+        "MetricName": "MaliciousRequesters",
+        "Rules": [{
+          "Action": {
+            "Type": "BLOCK"
+          },
+          "Priority": 1,
+          "RuleId": {
+            "Ref": "WAFManualBlockRule"
+          }
+        }, {
+          "Action": {
+            "Type": "BLOCK"
+          },
+          "Priority": 2,
+          "RuleId": {
+            "Ref": "WAFAutoBlockRule"
+          }
+        }, {
+          "Action": {
+            "Type": "COUNT"
+          },
+          "Priority": 3,
+          "RuleId": {
+            "Ref": "WAFAutoCountRule"
+          }
+        }]
+      }
+    },
+    "LambdaRole": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "Service": ["lambda.amazonaws.com"]
+            },
+            "Action": ["sts:AssumeRole"]
+          }]
+        },
+        "Path": "/",
+        "Policies": [{
+          "PolicyName": "S3Access",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "s3:*",
+              "Resource": "*"
+            }]
+          }
+        }, {
+          "PolicyName": "WAFAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "waf:*",
+              "Resource": "*"
+            }]
+          }
+        }, {
+          "PolicyName": "LogsAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "logs:*",
+              "Resource": "*"
+            }]
+          }
+        }, {
+          "PolicyName": "LambdAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "lambda:*",
+              "Resource": "*"
+            }]
+          }
+        }, {
+          "PolicyName": "CloudFormationAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "cloudformation:DescribeStacks",
+              "Resource": "*"
+            }]
+          }
+        }, {
+          "PolicyName": "CloudWatchAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "cloudwatch:PutMetricData",
+              "Resource": "*"
+            }]
+          }
+        }]
+      }
+    },
+    "LambdaWAFBlacklistingFunction": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": "LambdaRole",
+      "Properties": {
+        "Description": {
+          "Fn::Join": [":", [{
+            "Ref": "RequestThreshold"
+          }, {
+            "Ref": "WAFBlockPeriod"
+          }, {
+            "Ref": "WAFQuarantinePeriod"
+          }]]
+        },
+        "Handler": "parser.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": ["LambdaRole", "Arn"]
+        },
+        "Code": {
+          "S3Bucket": "heitorc",
+          "S3Key": "waf_reactive_blacklist/parser.zip"
+        },
+        "Runtime": "python2.7",
+        "MemorySize": "512",
+        "Timeout": "60"
+      }
+    },
+    "LambdaInvokePermission": {
+      "Type": "AWS::Lambda::Permission",
+      "DependsOn": "LambdaWAFBlacklistingFunction",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": ["LambdaWAFBlacklistingFunction", "Arn"]
+        },
+        "Action": "lambda:*",
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        }
+      }
+    },
+    "S3CloudFrontAccessLogBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DependsOn": "LambdaWAFBlacklistingFunction",
+      "Properties": {
+        "BucketName": {
+          "Ref": "CloudFrontAccessLogBucket"
+        },
+        "AccessControl": "Private",
+        "NotificationConfiguration": {
+          "LambdaConfigurations": [{
+            "Event": "s3:ObjectCreated:*",
+            "Filter": {
+              "S3Key": {
+                "Rules": [{
+                  "Name": "suffix",
+                  "Value": "gz"
+                }]
+              }
+            },
+            "Function": {
+              "Fn::GetAtt": ["LambdaWAFBlacklistingFunction", "Arn"]
+            }
+          }]
+        }
+      },
+      "DeletionPolicy": "Retain"
+    }
+  },
+
+  "Outputs": {
+    "CloudFrontAccessLogBucket": {
+      "Description": "CloudFront Access Log Bucket",
+      "Value": {
+        "Ref": "CloudFrontAccessLogBucket"
+      }
+    },
+    "RequestThreshold": {
+      "Description": "Request Threshold",
+      "Value": {
+        "Ref": "RequestThreshold"
+      }
+    },
+    "WAFBlockPeriod": {
+      "Description": "WAF Block Period",
+      "Value": {
+        "Ref": "WAFBlockPeriod"
+      }
+    },
+    "WAFQuarantinePeriod": {
+      "Description": "WAF Quarantine Period",
+      "Value": {
+        "Ref": "WAFQuarantinePeriod"
+      }
+    },
+    "ManualBlockIPSetID": {
+      "Description": "Manual Block IP Set ID",
+      "Value": {
+        "Ref": "WAFManualBlockSet"
+      }
+    },
+    "AutoBlockIPSetID": {
+      "Description": "Auto Block IP Set ID",
+      "Value": {
+        "Ref": "WAFAutoBlockSet"
+      }
+    },
+    "AutoCountIPSetID": {
+      "Description": "Auto Count IP Set ID",
+      "Value": {
+        "Ref": "WAFAutoCountSet"
+      }
+    }
+  }
+}
