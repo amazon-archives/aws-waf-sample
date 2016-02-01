@@ -137,7 +137,7 @@ def merge_current_blocked_requesters(key_name, outstanding_requesters):
                 else:
                     prev_updated_at = datetime.datetime.strptime(v['updated_at'], "%Y-%m-%d %H:%M:%S")
                     total_diff_sec = (now_timestamp - prev_updated_at).total_seconds()
-                    BLACKLIST_COUNT_PERIOD):
+                    if total_diff_sec > (BLACKLIST_BLOCK_PERIOD + BLACKLIST_COUNT_PERIOD):
                         print "[merge_current_blocked_requesters] \t\tExpired BLOCK and COUNT %s rule"%k
                     elif total_diff_sec > (BLACKLIST_BLOCK_PERIOD):
                         print "[merge_current_blocked_requesters] \t\tExpired BLOCK %s rule"%k
@@ -159,7 +159,7 @@ def merge_current_blocked_requesters(key_name, outstanding_requesters):
                     outstanding_requesters['block'][k] = { 'max_req_per_min': max_v, 'updated_at': now_timestamp_str }
                 else:
                     prev_updated_at = datetime.datetime.strptime(v['updated_at'], "%Y-%m-%d %H:%M:%S")
-                    BLACKLIST_COUNT_PERIOD):
+                    if (now_timestamp - prev_updated_at).total_seconds() > (BLACKLIST_BLOCK_PERIOD + BLACKLIST_COUNT_PERIOD):
                         print "[merge_current_blocked_requesters] \t\tExpired COUNT %s rule"%k
                     else:
                         print "[merge_current_blocked_requesters] \t\tKeeping data of COUNT %s rule"%k
@@ -349,12 +349,12 @@ def lambda_handler(event, context):
         global IP_SET_ID_AUTO_BLOCK
         global IP_SET_ID_AUTO_COUNT
         global BLACKLIST_BLOCK_PERIOD
-        BLACKLIST_COUNT_PERIOD
+        global BLACKLIST_COUNT_PERIOD
         global REQUEST_PER_MINUTE_LIMIT
 
         if (OUTPUT_BUCKET == None or IP_SET_ID_MANUAL_BLOCK == None or
             IP_SET_ID_AUTO_BLOCK == None or IP_SET_ID_AUTO_COUNT == None or
-            BLACKLIST_COUNT_PERIOD == None or
+            BLACKLIST_BLOCK_PERIOD == None or BLACKLIST_COUNT_PERIOD == None or
             REQUEST_PER_MINUTE_LIMIT == None):
 
             outputs = {}
@@ -374,7 +374,7 @@ def lambda_handler(event, context):
                 IP_SET_ID_AUTO_COUNT = outputs['AutoCountIPSetID']
             if BLACKLIST_BLOCK_PERIOD == None:
                 BLACKLIST_BLOCK_PERIOD = int(outputs['WAFBlockPeriod']) # in seconds
-            BLACKLIST_COUNT_PERIOD == None:
+            if BLACKLIST_COUNT_PERIOD == None:
                 BLACKLIST_COUNT_PERIOD = int(outputs['WAFQuarantinePeriod']) # in seconds
             if REQUEST_PER_MINUTE_LIMIT == None:
                 REQUEST_PER_MINUTE_LIMIT = int(outputs['RequestThreshold'])
@@ -384,7 +384,7 @@ def lambda_handler(event, context):
         print "[lambda_handler] \t\tIP_SET_ID_AUTO_BLOCK = %s"%IP_SET_ID_AUTO_BLOCK
         print "[lambda_handler] \t\tIP_SET_ID_AUTO_COUNT = %s"%IP_SET_ID_AUTO_COUNT
         print "[lambda_handler] \t\tBLACKLIST_BLOCK_PERIOD = %d"%BLACKLIST_BLOCK_PERIOD
-        BLACKLIST_COUNT_PERIOD
+        print "[lambda_handler] \t\tBLACKLIST_COUNT_PERIOD = %d"%BLACKLIST_COUNT_PERIOD
         print "[lambda_handler] \t\tREQUEST_PER_MINUTE_LIMIT = %d"%REQUEST_PER_MINUTE_LIMIT
 
         #--------------------------------------------------------------------------------------------------------------
