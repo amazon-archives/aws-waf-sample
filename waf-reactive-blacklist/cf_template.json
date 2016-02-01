@@ -250,7 +250,7 @@
         },
         "Code": {
           "S3Bucket": "heitorc",
-          "S3Key": "waf_reactive_blacklist/parser.zip"
+          "S3Key": "waf-reactive-blacklist/parser.zip"
         },
         "Runtime": "python2.7",
         "MemorySize": "512",
