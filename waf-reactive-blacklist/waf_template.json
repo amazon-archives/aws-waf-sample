@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "This AWS CloudFormation template that helps you provision the AWS WAF Reactive Blacklist stack without worrying about creating and configuring the underlying AWS infrastructure. **WARNING** This template creates a Lambda Function, a AWS WAF Web ACL, a S3 Bucket and a CloudWatch Custom Metric. You will be billed for the AWS resources used if you create a stack from this template. **NOTICE** Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved. Licensed under the Apache License, Version 2.0 (the License). You may not use this file except in compliance with the License. A copy of the License is located at http://aws.amazon.com/apache2.0/ or in the license file accompanying this file. This file is distributed on an AS IS BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.",
+  "Description": "This AWS CloudFormation template helps you provision the AWS WAF reactive blacklist stack without worrying about creating and configuring the underlying AWS infrastructure. **WARNING** This template creates an AWS Lambda function, an AWS WAF Web ACL, an Amazon S3 bucket, and an Amazon CloudWatch custom metric. You will be billed for the AWS resources used if you create a stack from this template. **NOTICE** Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved. Licensed under the Apache License, Version 2.0 (the License). You may not use this file except in compliance with the License. A copy of the License is located at http://aws.amazon.com/apache2.0/ or in the license file accompanying this file. This file is distributed on an AS IS BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the License for the specific language governing permissions and limitations under the License.",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [{
@@ -35,22 +35,22 @@
     "CloudFrontAccessLogBucket": {
       "Type": "String",
       "Default": "",
-      "Description": "Enter the name of the bucket where the CloudFront files are stored. Rules for bucket naming: http://amzn.to/1QXbleZ"
+      "Description": "Enter the name of the S3 bucket where you will store the CloudFront access logs (e.g., http://bucket.s3-aws-region.amazonaws.com)"
     },
     "RequestThreshold": {
       "Type": "Number",
       "Default": "400",
-      "Description": "Enter the max acceptable request per minute per IP. Default: 400 requests per second"
+      "Description": "Enter the maximum acceptable request per second per IP address. Default: 400 requests per second"
     },
     "WAFBlockPeriod": {
       "Type": "Number",
       "Default": "14400",
-      "Description": "Enter for how long (in seconds) does the IP sloud be blocked. Default: 4 hours (144000 sec)"
+      "Description": "Enter for how long (in seconds) IP addresses should be blocked. Default: 4 hours (144000 sec)"
     },
     "WAFQuarantinePeriod": {
       "Type": "Number",
       "Default": "14400",
-      "Description": "Enter for how long (in seconds) does the IP sloud be kept in quarentine. Default: 4 hours (144000 sec)"
+      "Description": "Enter for how long (in seconds) IP addresses should be kept in quarantine. Default: 4 hours (144000 sec)"
     }
   },
 
