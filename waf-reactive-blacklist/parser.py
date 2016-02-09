@@ -27,8 +27,8 @@ IP_SET_ID_MANUAL_BLOCK = None
 IP_SET_ID_AUTO_BLOCK = None
 IP_SET_ID_AUTO_COUNT = None
 
-BLACKLIST_BLOCK_PERIOD = None # in seconds
-BLACKLIST_COUNT_PERIOD = None # in seconds
+BLACKLIST_BLOCK_PERIOD = None # in minutes
+BLACKLIST_COUNT_PERIOD = None # in minutes
 REQUEST_PER_MINUTE_LIMIT = None
 
 LIMIT_IP_ADDRESS_RANGES_PER_IP_MATCH_CONDITION = 1000
@@ -136,10 +136,10 @@ def merge_current_blocked_requesters(key_name, outstanding_requesters):
                     outstanding_requesters['block'][k] = { 'max_req_per_min': max_v, 'updated_at': now_timestamp_str }
                 else:
                     prev_updated_at = datetime.datetime.strptime(v['updated_at'], "%Y-%m-%d %H:%M:%S")
-                    total_diff_sec = (now_timestamp - prev_updated_at).total_seconds()
-                    if total_diff_sec > (BLACKLIST_BLOCK_PERIOD + BLACKLIST_COUNT_PERIOD):
+                    total_diff_min = ((now_timestamp - prev_updated_at).total_seconds())/60
+                    if total_diff_min > (BLACKLIST_BLOCK_PERIOD + BLACKLIST_COUNT_PERIOD):
                         print "[merge_current_blocked_requesters] \t\tExpired BLOCK and COUNT %s rule"%k
-                    elif total_diff_sec > (BLACKLIST_BLOCK_PERIOD):
+                    elif total_diff_min > (BLACKLIST_BLOCK_PERIOD):
                         print "[merge_current_blocked_requesters] \t\tExpired BLOCK %s rule"%k
                         outstanding_requesters['count'][k] = v
                     else:
@@ -159,7 +159,8 @@ def merge_current_blocked_requesters(key_name, outstanding_requesters):
                     outstanding_requesters['block'][k] = { 'max_req_per_min': max_v, 'updated_at': now_timestamp_str }
                 else:
                     prev_updated_at = datetime.datetime.strptime(v['updated_at'], "%Y-%m-%d %H:%M:%S")
-                    if (now_timestamp - prev_updated_at).total_seconds() > (BLACKLIST_BLOCK_PERIOD + BLACKLIST_COUNT_PERIOD):
+                    total_diff_min = ((now_timestamp - prev_updated_at).total_seconds())/60
+                    if total_diff_min > (BLACKLIST_BLOCK_PERIOD + BLACKLIST_COUNT_PERIOD):
                         print "[merge_current_blocked_requesters] \t\tExpired COUNT %s rule"%k
                     else:
                         print "[merge_current_blocked_requesters] \t\tKeeping data of COUNT %s rule"%k
@@ -365,7 +366,10 @@ def lambda_handler(event, context):
                 outputs[e['OutputKey']] = e['OutputValue']
 
             if OUTPUT_BUCKET == None:
-                OUTPUT_BUCKET = outputs['CloudFrontAccessLogBucket']
+                if 'CloudFrontAccessLogBucket' in outputs.keys():
+                    OUTPUT_BUCKET = outputs['CloudFrontAccessLogBucket']
+                else:
+                    OUTPUT_BUCKET = bucket_name
             if IP_SET_ID_MANUAL_BLOCK == None:
                 IP_SET_ID_MANUAL_BLOCK = outputs['ManualBlockIPSetID']
             if IP_SET_ID_AUTO_BLOCK == None:
