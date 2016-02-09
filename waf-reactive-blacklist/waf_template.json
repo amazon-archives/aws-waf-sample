@@ -7,7 +7,7 @@
         "Label": {
           "default": "S3 Location"
         },
-        "Parameters": ["CloudFrontAccessLogBucket"]
+        "Parameters": ["CloudFrontCreateAccessLogBucket","CloudFrontAccessLogBucket"]
       }, {
         "Label": {
           "default": "Rate-Based Blacklisting Parameters"
@@ -15,6 +15,9 @@
         "Parameters": ["RequestThreshold", "WAFBlockPeriod", "WAFQuarantinePeriod"]
       }],
       "ParameterLabels": {
+        "CloudFrontCreateAccessLogBucket": {
+          "default": "Create CloudFront Access Log Bucket"
+        },
         "CloudFrontAccessLogBucket": {
           "default": "CloudFront Access Log Bucket Name"
         },
@@ -32,6 +35,12 @@
   },
 
   "Parameters": {
+    "CloudFrontCreateAccessLogBucket": {
+      "Type" : "String",
+      "Default" : "yes",
+      "AllowedValues" : ["yes", "no"],
+      "Description" : "Select Yes to create a new S3 bucket for CloudFront Access Logs. Select No if you already have an S3 bucket for CloudFront Access logs."
+    },
     "CloudFrontAccessLogBucket": {
       "Type": "String",
       "Default": "",
@@ -40,18 +49,22 @@
     "RequestThreshold": {
       "Type": "Number",
       "Default": "400",
-      "Description": "Enter the maximum acceptable request per second per IP address. Default: 400 requests per second"
+      "Description": "Enter the maximum acceptable request per second per IP address. Default: 400 requests per minute"
     },
     "WAFBlockPeriod": {
       "Type": "Number",
-      "Default": "14400",
-      "Description": "Enter for how long (in seconds) IP addresses should be blocked. Default: 4 hours (144000 sec)"
+      "Default": "240",
+      "Description": "Enter for how long (in minutes) IP addresses should be blocked. Default: 4 hours (240 minutes)"
     },
     "WAFQuarantinePeriod": {
       "Type": "Number",
-      "Default": "14400",
-      "Description": "Enter for how long (in seconds) IP addresses should be kept in quarantine. Default: 4 hours (144000 sec)"
+      "Default": "240",
+      "Description": "Enter for how long (in minutes) IP addresses should be kept in quarantine. Default: 4 hours (240 minutes)"
     }
+  },
+
+  "Conditions" : {
+    "CreateBucket" : {"Fn::Equals" : [{"Ref" : "CloudFrontCreateAccessLogBucket"}, "yes"]}
   },
 
   "Resources": {
@@ -273,6 +286,7 @@
     },
     "S3CloudFrontAccessLogBucket": {
       "Type": "AWS::S3::Bucket",
+      "Condition" : "CreateBucket",
       "DependsOn": "LambdaWAFBlacklistingFunction",
       "Properties": {
         "BucketName": {
@@ -305,7 +319,8 @@
       "Description": "CloudFront Access Log Bucket",
       "Value": {
         "Ref": "CloudFrontAccessLogBucket"
-      }
+      },
+      "Condition" : "CreateBucket"
     },
     "RequestThreshold": {
       "Description": "Request Threshold",
