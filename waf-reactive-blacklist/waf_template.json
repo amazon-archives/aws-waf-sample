@@ -262,8 +262,8 @@
           "Fn::GetAtt": ["LambdaRole", "Arn"]
         },
         "Code": {
-          "S3Bucket": "awsiammedia",
-          "S3Key": "public/sample/waf-reactive/blacklist/parser.zip"
+          "S3Bucket": {"Fn::Join": [".", [{ "Ref" : "AWS::Region" },"heitorc"]]},
+          "S3Key": "waf-reactive-blacklist/parser.zip"
         },
         "Runtime": "python2.7",
         "MemorySize": "512",
