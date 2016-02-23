@@ -1,0 +1,27 @@
+{
+  "name": "aws-waf-bad-bot-blocking",
+  "version": "0.1.0",
+  "description": "Blacklist an IP address hitting a honeypot URL using the AWS WAF service",
+  "main": "function.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {},
+  "dependencies": {
+    "async": "^1.5.2",
+    "validator": "^4.5.2"
+  },
+  "devDependencies": {
+    "aws-sdk": "latest",
+    "grunt": "latest",
+    "grunt-pack": "latest",
+    "grunt-aws-lambda": "latest",
+    "npm": "latest"
+  },
+  "bundledDependencies": [
+    "async",
+    "validator"
+  ],
+  "author": "Vlad Vlasceanu",
+  "license": "SEE LICENSE IN LICENSE.txt"
+}

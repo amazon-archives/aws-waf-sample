@@ -1,0 +1,119 @@
+{
+	"swagger": "2.0",
+	"info": {
+		"version": "2016-01-29T01:41:18Z",
+		"title": "AwsBadBotBlocking"
+	},
+	"schemes": [ "https" ],
+	"paths": {
+		"/[[honeypot-uri]]": {
+			"get": {
+				"consumes": [ "application/json" ],
+				"produces": [ "application/json" ],
+				"parameters": [ {
+					"in": "body",
+					"name": "WafHeaderSchema",
+					"required": true,
+					"schema": { "$ref": "#/definitions/WafHeaderSchema" }
+				} ],
+				"responses": {
+					"200": {
+						"description": "200 response",
+						"schema": { "$ref": "#/definitions/Empty" },
+						"headers": {}
+					},
+					"500": {
+						"description": "500 response",
+						"schema": { "$ref": "#/definitions/Error" },
+						"headers": {}
+					}
+				},
+				"security": [ {
+					"api_key": []
+				} ],
+				"x-amazon-apigateway-integration": {
+					"responses": {
+						"default": {
+							"statusCode": "200",
+							"responseTemplates": { "application/json": "__passthrough__" }
+						}
+					},
+					"requestTemplates": {
+						"application/json": "#set($inputRoot = $input.path('$'))\n{\n  \"forwardedIps\": \"$input.params('X-Forwarded-For')\",\n  \"viewerCountry\": \"$input.params('CloudFront-Viewer-Country')\",\n  \"isDesktop\": \"$input.params('CloudFront-Is-Desktop-Viewer')\",\n  \"isMobile\": \"$input.params('CloudFront-Is-Mobile-Viewer')\",\n  \"isSmartTV\": \"$input.params('CloudFront-Is-SmartTV-Viewer')\",\n  \"isTablet\": \"$input.params('CloudFront-Is-Tablet-Viewer')\"\n}"
+					},
+					"uri": "arn:aws:apigateway:[[region]]:lambda:path/2015-03-31/functions/arn:aws:lambda:[[region]]:[[account-id]]:function:[[lambda-function-name]]/invocations",
+					"httpMethod": "POST",
+					"type": "aws"
+				}
+			},
+			"post": {
+				"consumes": [ "application/json" ],
+				"produces": [ "application/json" ],
+				"parameters": [ {
+					"in": "body",
+					"name": "WafHeaderSchema",
+					"required": true,
+					"schema": { "$ref": "#/definitions/WafHeaderSchema" }
+				} ],
+				"responses": {
+					"200": {
+						"description": "200 response",
+						"schema": { "$ref": "#/definitions/Empty" },
+						"headers": {}
+					},
+					"500": {
+						"description": "500 response",
+						"schema": { "$ref": "#/definitions/Error" },
+						"headers": {}
+					}
+				},
+				"security": [ {
+					"api_key": []
+				} ],
+				"x-amazon-apigateway-integration": {
+					"responses": {
+						"default": {
+							"statusCode": "200",
+							"responseTemplates": { "application/json": "__passthrough__" }
+						}
+					},
+					"requestTemplates": {
+						"application/json": "#set($inputRoot = $input.path('$'))\n{\n  \"forwardedIps\": \"$input.params('X-Forwarded-For')\",\n  \"viewerCountry\": \"$input.params('CloudFront-Viewer-Country')\",\n  \"isDesktop\": \"$input.params('CloudFront-Is-Desktop-Viewer')\",\n  \"isMobile\": \"$input.params('CloudFront-Is-Mobile-Viewer')\",\n  \"isSmartTV\": \"$input.params('CloudFront-Is-SmartTV-Viewer')\",\n  \"isTablet\": \"$input.params('CloudFront-Is-Tablet-Viewer')\"\n}"
+					},
+					"uri": "arn:aws:apigateway:[[region]]:lambda:path/2015-03-31/functions/arn:aws:lambda:[[region]]:[[account-id]]:function:[[lambda-function-name]]/invocations",
+					"httpMethod": "POST",
+					"type": "aws"
+				}
+			}
+		}
+	},
+	"securityDefinitions": {
+		"api_key": {
+			"type": "apiKey",
+			"name": "x-api-key",
+			"in": "header"
+		}
+	},
+	"definitions": {
+		"WafHeaderSchema": {
+			"type": "object",
+			"properties": {
+				"forwardedIps": { "type": "string" },
+				"viewerCountry": { "type": "string" },
+				"isDesktop": { "type": "string" },
+				"isMobile": { "type": "string" },
+				"isSmartTV": { "type": "string" },
+				"isTablet": { "type": "string" }
+			}
+		},
+		"Empty": {
+			"type": "object"
+		},
+		"Error": {
+			"type": "object",
+			"properties": {
+				"message": { "type": "string" }
+			}
+		}
+	}
+}

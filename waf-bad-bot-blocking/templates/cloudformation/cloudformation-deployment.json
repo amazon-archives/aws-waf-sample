@@ -1,0 +1,209 @@
+{
+	"AWSTemplateFormatVersion" : "2010-09-09",
+	"Description" : "Blacklist an IP address hitting the honeypot",
+    "Metadata": {
+		"AWS::CloudFormation::Interface": {
+			"ParameterGroups": [ {
+        		"Label": { "default": "General" },
+        		"Parameters": [ "pBaseName" ]
+			},
+		 	{
+				"Label": { "default": "API Gateway Integration" },
+				"Parameters": [ "pApiId" ]
+			} ],
+			"ParameterLabels": {
+				"pBaseName": { "default": "Base Resource Name" },
+				"pApiId": { "default": "Restful API ID" }
+			}
+		}
+	},
+	"Parameters" : {
+		"pBaseName": {
+			"Type": "String",
+			"Description": "Base name to apply to the resources in this solution",
+			"Default": "wafBadBotBlocker",
+			"AllowedPattern": "[a-zA-Z0-9]+",
+			"MaxLength": 32,
+			"MinLength": 1
+		},
+		"pApiId": {
+			"Type": "String",
+			"Description": "The ID of the API Gateway Restful API created",
+			"Default": "",
+			"AllowedPattern": "[a-z0-9]*",
+			"MaxLength": 10
+		}
+	},
+	"Mappings": {
+		"mFunctionSources": {
+			"us-east-1": { "Bucket": "awswaf.us-east-1" },
+			"us-west-2": { "Bucket": "awswaf.us-west-2" },
+			"eu-west-1": { "Bucket": "awswaf.eu-west-1" },
+			"ap-northeast-1": { "Bucket": "awswaf.ap-northeast-1" }
+		}
+	},
+	"Resources": {
+		"rIpSet": {
+			"Type": "AWS::WAF::IPSet",
+			"Properties": {
+				"Name": { "Fn::Join": [ "", [ { "Ref": "pBaseName" }, "IpSetBadActors" ] ] },
+				"IPSetDescriptors": [ ]
+			}
+		},
+		"rRule": {
+			"Type": "AWS::WAF::Rule",
+			"DependsOn": [ "rIpSet" ],
+			"Properties": {
+				"MetricName": { "Fn::Join": [ "", [ { "Ref": "pBaseName" }, "RuleBadActorIps" ] ] },
+				"Name": { "Fn::Join": [ "", [ { "Ref": "pBaseName" }, "RuleBadActorIps" ] ] },
+				"Predicates": [ {
+					"DataId": { "Ref": "rIpSet" },
+					"Negated": false,
+					"Type": "IPMatch"
+				} ]
+			}
+		},
+		"rWebAcl": {
+			"Type": "AWS::WAF::WebACL",
+			"DependsOn": [ "rRule" ],
+			"Properties": {
+				"Name": { "Fn::Join": [ "", [ { "Ref": "pBaseName" }, "WebAcl" ] ] },
+				"MetricName": { "Fn::Join": [ "", [ { "Ref": "pBaseName" }, "WebAcl" ] ] },
+				"DefaultAction": { "Type": "ALLOW" },
+				"Rules": [ {
+					"Action": { "Type": "BLOCK" },
+					"Priority": 1,
+					"RuleId": { "Ref": "rRule" }
+				} ]
+			}
+		},
+		"rSnsTopic": {
+			"Type": "AWS::SNS::Topic",
+			"Properties" : {
+				"DisplayName": "BadBotBlocked",
+				"Subscription": [  ],
+				"TopicName": { "Fn::Join": [ "", [ { "Ref": "pBaseName" }, "SnsTopic" ] ] }
+			}
+		},
+		"rLambdaRole": {
+			"Type": "AWS::IAM::Role",
+			"DependsOn": [ "rIpSet", "rSnsTopic" ],
+			"Properties": {
+				"AssumeRolePolicyDocument": {
+					"Version" : "2012-10-17",
+					"Statement": [ {
+						"Effect": "Allow",
+						"Principal": {
+							"Service": [ "lambda.amazonaws.com" ]
+						},
+						"Action": [ "sts:AssumeRole" ]
+					} ]
+				},
+				"Policies": [ {
+					"PolicyName": { "Fn::Join": [ "", [ { "Ref": "pBaseName" }, "LambdaRole" ] ] },
+					"PolicyDocument": {
+						"Version": "2012-10-17",
+						"Statement": [
+							{
+								"Effect": "Allow",
+								"Action": [
+									"logs:CreateLogGroup",
+									"logs:CreateLogStream",
+									"logs:PutLogEvents"
+								],
+								"Resource": [
+									"arn:aws:logs:*:*:*"
+								]
+							},
+							{
+								"Effect": "Allow",
+								"Action": [
+									"waf:GetChangeToken"
+								],
+								"Resource": [
+									"*"
+								]
+							},
+							{
+								"Effect": "Allow",
+								"Action": [
+									"waf:UpdateIPSet"
+								],
+								"Resource": [
+									{ "Fn::Join": [ "", [ "arn:aws:waf::", { "Ref": "AWS::AccountId" }, ":ipset/", { "Ref": "rIpSet" } ] ] }
+								]
+							},
+							{
+								"Effect": "Allow",
+								"Action": [
+									"sns:Publish"
+								],
+								"Resource": [
+									{ "Ref": "rSnsTopic" }
+								]
+							},
+							{
+								"Effect": "Allow",
+								"Action": [
+									"lambda:GetFunctionConfiguration"
+								],
+								"Resource": [
+									"*"
+								]
+							}
+						]
+					}
+				} ]
+			}
+		},
+		"rLambdaFunction": {
+			"Type": "AWS::Lambda::Function",
+			"Properties": {
+				"Code": {
+					"S3Bucket": { "Fn::FindInMap": [ "mFunctionSources", { "Ref" : "AWS::Region" }, "Bucket" ] },
+					"S3Key": "waf-bad-bot-blocking/aws-waf-bad-bot-blocking_0-1-0_latest.zip"
+				},
+				"Description": { "Fn::Join": [ "|", [ "DO NOT CHANGE! - CONFIGURATION DATA", { "Ref": "rIpSet" }, { "Ref": "rSnsTopic" } ] ] },
+				"Handler": "function.handler",
+				"MemorySize": 128,
+				"Role": { "Fn::GetAtt": [ "rLambdaRole", "Arn" ] },
+				"Runtime": "nodejs",
+				"Timeout": 5
+			}
+		},
+		"rLambdaInvokePermission1": {
+			"Type": "AWS::Lambda::Permission",
+			"DependsOn": [ "rLambdaFunction" ],
+			"Properties": {
+				"FunctionName": { "Fn::GetAtt": [ "rLambdaFunction", "Arn" ] },
+				"Action": "lambda:InvokeFunction",
+				"Principal": "apigateway.amazonaws.com",
+				"SourceArn": { "Fn::Join": [ "", [ "arn:aws:execute-api:", { "Ref": "AWS::Region" }, ":", { "Ref" : "AWS::AccountId" }, ":", { "Ref": "pApiId" }, "/*/GET/*" ] ] }
+			}
+		},
+		"rLambdaInvokePermission2": {
+			"Type": "AWS::Lambda::Permission",
+			"DependsOn": [ "rLambdaFunction" ],
+			"Properties": {
+				"FunctionName": { "Fn::GetAtt": [ "rLambdaFunction", "Arn" ] },
+				"Action": "lambda:InvokeFunction",
+				"Principal": "apigateway.amazonaws.com",
+				"SourceArn": { "Fn::Join": [ "", [ "arn:aws:execute-api:", { "Ref": "AWS::Region" }, ":", { "Ref" : "AWS::AccountId" }, ":", { "Ref": "pApiId" }, "/*/POST/*" ] ] }
+			}
+		}
+	},
+	"Outputs": {
+		"oIpSet": {
+			"Description": "The IPSet condition created by this template",
+			"Value": { "Ref": "rIpSet" }
+		},
+		"oSnsTopic": {
+			"Description": "The SNS Topic created by this template",
+			"Value": { "Ref": "rSnsTopic" }
+		},
+		"oLambdaFunction": {
+			"Description": "The name of the Lambda function to use with the API Gateway",
+			"Value": { "Ref": "rLambdaFunction" }
+		}
+	}
+}
