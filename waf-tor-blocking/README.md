@@ -7,9 +7,9 @@ The function expects to be passed an event containing the list if WAF IP Set IDs
 
 ```json
 {
-    ipSetIds: [
-        '<ip-set-1-id>',
-        '<ip-set-2-id>'
+    "ipSetIds": [
+        "<ip-set-1-id>",
+        "<ip-set-2-id>"
     ] 
 }
 ```
