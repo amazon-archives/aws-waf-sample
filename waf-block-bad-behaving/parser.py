@@ -24,9 +24,9 @@ OUTPUT_BUCKET = None
 IP_SET_ID_MANUAL_BLOCK = None
 IP_SET_ID_AUTO_BLOCK = None
 
-BLACKLIST_BLOCK_PERIOD = None # in seconds
+BLACKLIST_BLOCK_PERIOD = None # in minutes
 REQUEST_PER_MINUTE_LIMIT = None
-BLOCK_ERROR_CODES = ['400','403','404','405'] # Error codes to parse logs for
+BLOCK_ERROR_CODES = ['400','403','404','405'] # error codes to parse logs for
 
 LIMIT_IP_ADDRESS_RANGES_PER_IP_MATCH_CONDITION = 1000
 API_CALL_NUM_RETRIES = 3
@@ -133,8 +133,8 @@ def merge_current_blocked_requesters(key_name, outstanding_requesters):
                     outstanding_requesters['block'][k] = { 'max_req_per_min': max_v, 'updated_at': now_timestamp_str }
                 else:
                     prev_updated_at = datetime.datetime.strptime(v['updated_at'], "%Y-%m-%d %H:%M:%S")
-                    total_diff_sec = (now_timestamp - prev_updated_at).total_seconds()
-                    if total_diff_sec > (BLACKLIST_BLOCK_PERIOD):
+                    total_diff_min = ((now_timestamp - prev_updated_at).total_seconds())/60
+                    if total_diff_min > (BLACKLIST_BLOCK_PERIOD):
                         print "[merge_current_blocked_requesters] \t\tExpired BLOCK %s rule"%k
                         outstanding_requesters['block'][k] = v
 
@@ -335,13 +335,16 @@ def lambda_handler(event, context):
                 outputs[e['OutputKey']] = e['OutputValue']
 
             if OUTPUT_BUCKET == None:
-                OUTPUT_BUCKET = outputs['CloudFrontAccessLogBucket']
+                if 'CloudFrontAccessLogBucket' in outputs.keys():
+                    OUTPUT_BUCKET = outputs['CloudFrontAccessLogBucket']
+                else:
+                    OUTPUT_BUCKET = bucket_name
             if IP_SET_ID_MANUAL_BLOCK == None:
                 IP_SET_ID_MANUAL_BLOCK = outputs['ManualBlockIPSetID']
             if IP_SET_ID_AUTO_BLOCK == None:
                 IP_SET_ID_AUTO_BLOCK = outputs['AutoBlockIPSetID']
             if BLACKLIST_BLOCK_PERIOD == None:
-                BLACKLIST_BLOCK_PERIOD = int(outputs['WAFBlockPeriod']) # in seconds
+                BLACKLIST_BLOCK_PERIOD = int(outputs['WAFBlockPeriod']) # in minutes
             if REQUEST_PER_MINUTE_LIMIT == None:
                 REQUEST_PER_MINUTE_LIMIT = int(outputs['RequestThreshold'])
 
