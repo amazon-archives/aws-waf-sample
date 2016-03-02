@@ -260,8 +260,18 @@
           ]
         },
         "Code": {
-          "S3Bucket": "benjipotter-waf-oregon",
-          "S3Key": "waf/parser.zip"
+          "S3Bucket": {
+            "Fn::Join": [
+              ".",
+              [
+                "awswaf",
+                {
+                  "Ref": "AWS::Region"
+                }
+              ]
+            ]
+          },
+          "S3Key": "block-bad-behaving-ips/parser.zip"
         },
         "Runtime": "python2.7",
         "MemorySize": "512",
