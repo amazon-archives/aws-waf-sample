@@ -14,7 +14,7 @@ var ASYNC = require('async');
 var VALIDATOR = require('validator');
 
 // set up clients
-var wafClient = new AWS.WAF({ region: 'us-east-1', maxRetries: 3 });
+var wafClient = new AWS.WAF({ region: 'us-east-1' });
 var snsClient = new AWS.SNS({ maxRetries: 3 });
 var lambdaClient = new AWS.Lambda({ maxRetries: 3 });
 
@@ -23,11 +23,11 @@ exports.handler = function(event, context) {
 	// execute all actions in a waterfall sequence (assuming no steps fail)
 	ASYNC.waterfall([
 		// get the function configuration for self
-		function (callback) {
+		function(callback) {
 			// we're storing execution parameters in the description of the function itself
 			lambdaClient.getFunctionConfiguration({
 				FunctionName: context.functionName
-			}, function (err, result) {
+			}, function(err, result) {
 				if (err) {
 					// log the error
 					console.log(err, err.stack);
@@ -56,7 +56,7 @@ exports.handler = function(event, context) {
 			});
 		},
 		// extract and validate the source IP address
-		function (config, callback) {
+		function(config, callback) {
 			// make sure the input event is valid
 			if (event.forwardedIps !== undefined && event.forwardedIps.length !== undefined && event.forwardedIps.length > 0) {
 				// working with forwarded IPs only, API Gateway acts as a proxy and adds the source IP to the x-forwarded-for header
@@ -97,56 +97,78 @@ exports.handler = function(event, context) {
 			}
 		},
 		// get a AWS WAF change token
-		function (config, sourceIp, callback) {
-			// call the AWS WAF API
-			wafClient.getChangeToken({}, function(err, result) {
-				if (err) {
-					// log the error
-					console.log(err, err.stack);
+		function(config, sourceIp, callback) {
+			// implementing separate retry mechanism to control interval
+			ASYNC.retry({ times: 3, interval: 1002 }, function(tokenCallback, prevResult) {
+				// call the AWS WAF API
+				wafClient.getChangeToken({}, function(err, result) {
+					if (err) {
+						// log the error
+						console.log(err, err.stack);
 
-					// error out
-					callback('Cannot provision an AWS WAF Change Token');
-				} else {
-					// make sure the output is valid
-					if (result.ChangeToken !== undefined) {
-						// export the source IP, config, token & next step
-						callback(null, config, sourceIp, result.ChangeToken);
-					} else {
 						// error out
-						callback('Received an unexpected response from the server while provisioning a WAF ChangeToken');
+						tokenCallback('Cannot provision an AWS WAF Change Token');
+					} else {
+						// make sure the output is valid
+						if (result.ChangeToken !== undefined) {
+							// export the source IP, config, token & next step
+							tokenCallback(null, result.ChangeToken);
+						} else {
+							// error out
+							tokenCallback('Received an unexpected response from the server while provisioning a WAF ChangeToken');
+						}
 					}
+				});
+			}, function(err, result) {
+				if (err) {
+					// error out
+					callback(err);
+				} else {
+					// export the source IP, config, token & next step
+					callback(null, config, sourceIp, result);
 				}
 			});
 		},
 		// update the AWS WAF IPSet using the token
 		function (config, sourceIp, changeToken, callback) {
-			// call the AWS WAF API
-			wafClient.updateIPSet({
-				ChangeToken: changeToken,
-				IPSetId: config.wafIpSetId,
-				Updates: [ {
-					Action: 'INSERT',
-					IPSetDescriptor: {
-						Type: 'IPV4',
-						Value: sourceIp + '/32'
+			// implementing separate retry mechanism to control interval
+			ASYNC.retry({ times: 3, interval: 1002 }, function(updateCallback, prevResult) {
+				// call the AWS WAF API
+				wafClient.updateIPSet({
+					ChangeToken: changeToken,
+					IPSetId: config.wafIpSetId,
+					Updates: [ {
+						Action: 'INSERT',
+						IPSetDescriptor: {
+							Type: 'IPV4',
+							Value: sourceIp + '/32'
+						}
+					} ]
+				}, function(err, result) {
+					if (err) {
+						// log the error
+						console.log(err, err.stack);
+
+						// error out
+						updateCallback('Cannot update the specified WAF IPSet');
+					} else {
+						// make sure the output is valid
+						if (result.ChangeToken !== undefined) {
+							// export the source IP, config, token & next step
+							updateCallback(null, true);
+						} else {
+							// error out
+							updateCallback('Received an unexpected response from the server while updating the WAF IPSet');
+						}
 					}
-				} ]
+				});
 			}, function(err, result) {
 				if (err) {
-					// log the error
-					console.log(err, err.stack);
-
 					// error out
-					callback('Cannot update the specified WAF IPSet');
+					callback(err);
 				} else {
-					// make sure the output is valid
-					if (result.ChangeToken !== undefined) {
-						// export the source IP, config, token & next step
-						callback(null, config, sourceIp, changeToken);
-					} else {
-						// error out
-						callback('Received an unexpected response from the server while updating the WAF IPSet');
-					}
+					// export the source IP, config, token & next step
+					callback(null, config, sourceIp, changeToken);
 				}
 			});
 		},

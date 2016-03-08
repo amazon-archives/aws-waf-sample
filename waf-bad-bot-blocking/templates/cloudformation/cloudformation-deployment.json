@@ -168,7 +168,7 @@
 				"MemorySize": 128,
 				"Role": { "Fn::GetAtt": [ "rLambdaRole", "Arn" ] },
 				"Runtime": "nodejs",
-				"Timeout": 5
+				"Timeout": 10
 			}
 		},
 		"rLambdaInvokePermission1": {
