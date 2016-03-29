@@ -19,7 +19,7 @@ import math
 print('Loading function')
 
 #======================================================================================================================
-# Contants
+# Constants
 #======================================================================================================================
 # Configurables
 OUTPUT_BUCKET = None
@@ -63,7 +63,7 @@ def get_outstanding_requesters(bucket_name, key_name):
         s3.download_file(bucket_name, key_name, local_file_path)
 
         #--------------------------------------------------------------------------------------------------------------
-        print '[get_outstanding_requesters] \tRead file contet'
+        print '[get_outstanding_requesters] \tRead file content'
         #--------------------------------------------------------------------------------------------------------------
         with gzip.open(local_file_path,'r') as content:
             for line in content:
@@ -167,7 +167,7 @@ def merge_current_blocked_requesters(key_name, outstanding_requesters):
                         outstanding_requesters['count'][k] = v
 
     except Exception, e:
-        print "[merge_current_blocked_requesters] \tError to merge data"
+        print "[merge_current_blocked_requesters] \tError to merging data"
 
     print "[merge_current_blocked_requesters] End"
     return outstanding_requesters
@@ -238,7 +238,7 @@ def get_ip_set_already_blocked():
                 for k in response['IPSet']['IPSetDescriptors']:
                     ip_set_already_blocked.append(k['Value'])
     except Exception, e:
-        print "[get_ip_set_already_blocked] Error to get waf ip set"
+        print "[get_ip_set_already_blocked] Error getting WAF IP set"
         print e
 
     print "[get_ip_set_already_blocked] End"
@@ -268,7 +268,7 @@ def update_waf_ip_set(outstanding_requesters, ip_set_id, ip_set_already_blocked)
     counter = 0
     try:
         if ip_set_id == None:
-            print "[update_waf_ip_set] Igone process when ip_set_id is None"
+            print "[update_waf_ip_set] Ignore process when ip_set_id is None"
             return
 
         updates_list = []
@@ -343,7 +343,7 @@ def lambda_handler(event, context):
             return
 
         #--------------------------------------------------------------------------------------------------------------
-        print "[lambda_handler] \tReading (if necessary) CloudFromation output values"
+        print "[lambda_handler] \tReading (if necessary) CloudFormation output values"
         #--------------------------------------------------------------------------------------------------------------
         global OUTPUT_BUCKET
         global IP_SET_ID_MANUAL_BLOCK
@@ -377,9 +377,9 @@ def lambda_handler(event, context):
             if IP_SET_ID_AUTO_COUNT == None:
                 IP_SET_ID_AUTO_COUNT = outputs['AutoCountIPSetID']
             if BLACKLIST_BLOCK_PERIOD == None:
-                BLACKLIST_BLOCK_PERIOD = int(outputs['WAFBlockPeriod']) # in seconds
+                BLACKLIST_BLOCK_PERIOD = int(outputs['WAFBlockPeriod']) # in minutes
             if BLACKLIST_COUNT_PERIOD == None:
-                BLACKLIST_COUNT_PERIOD = int(outputs['WAFQuarantinePeriod']) # in seconds
+                BLACKLIST_COUNT_PERIOD = int(outputs['WAFQuarantinePeriod']) # in minutes
             if REQUEST_PER_MINUTE_LIMIT == None:
                 REQUEST_PER_MINUTE_LIMIT = int(outputs['RequestThreshold'])
 
@@ -402,7 +402,7 @@ def lambda_handler(event, context):
         outstanding_requesters = merge_current_blocked_requesters(key_name, outstanding_requesters)
 
         #--------------------------------------------------------------------------------------------------------------
-        print "[lambda_handler] \tUpdate new blocked requesters list to S3s"
+        print "[lambda_handler] \tUpdate new blocked requesters list to S3"
         #--------------------------------------------------------------------------------------------------------------
         write_output(key_name, outstanding_requesters)
 
