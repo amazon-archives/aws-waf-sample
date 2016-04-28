@@ -1,17 +1,23 @@
 # waf-reputation-lists
 
-An AWS Lambda function for importing multiple IP reputation lists and updating AWS WAF IP Sets in order to deny access from the IP ranges defined in those lists.
+An AWS CloudFormation template that creates an AWS WAF Web ACL, Rules, and IP Sets, an AWS Lambda function and CLoudWatch Scheduled Event. The Lambda function imports multiple IP reputation lists and updates AWS WAF IP Sets in order to deny access from the IP ranges defined in those lists.
 Amazon CloudWatch Scheduled Events is utilised to execute the function regularly in order to automate the update of the IP Sets as the lists are updated. 
 
-The function expects to be passed an event containing the list if WAF IP Set IDs that it will populate with the IP addresses found in the list, using the following format:
+The templates expects a parameter providing a JSON object defining the URLs to the lists
 
 ```json
-{
-    "ipSetIds": [
-        "<ip-set-1-id>",
-        "<ip-set-2-id>"
-    ] 
-}
+[
+    {
+        "url": "https://www.spamhaus.org/drop/drop.txt"
+    },
+    {
+        "url": "https://check.torproject.org/exit-addresses",
+        "prefix": "ExitAddress "
+    },
+    {
+        "url": "https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt"
+    }
+]
 ```
  
 ***
