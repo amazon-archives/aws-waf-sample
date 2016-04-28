@@ -13,9 +13,8 @@ A solution for detecting bad bots and content scrapers and blocking their access
 A solution that automatically parses CloudFront access logs as they are delivered to Amazon S3 by using Lambda, counts the number of bad requests from unique sources (IP addresses), and updates AWS WAF to block further requests from those IP addresses. A CloudFormation template is included that creates the web access control list (ACL), rule sets, Lambda function, and logging S3 bucket.
 Full blog post: http://blogs.aws.amazon.com/security/post/Tx223ZW25YRPRKV/How-to-Use-AWS-WAF-to-Block-IP-Addresses-That-Generate-Bad-Requests
 
-## waf-tor-blocking
-An AWS Lambda function for importing the TOR exit node list (https://check.torproject.org/exit-addresses) and updating AWS WAF IP Sets in order to deny access from the TOR network.
-Amazon CloudWatch Scheduled Events can be utilised to execute the function regularly in order to automate the update of the IP Sets as the list are updated. 
+## waf-reputation-lists
+A solution that imports multiple IP reputation lists and updates AWS WAF IP Sets in order to deny access from the IP ranges defined in those lists. This includes the AWS CloudFormation template to create the WAF ACL, Rules, and IP Sets, along with a AWS Lambda function to perform the import, processing and updates of the IPSets, and an Amazon CloudWatch Scheduled Event to execute the function regularly in order to automate the updates. 
 
 ***
 

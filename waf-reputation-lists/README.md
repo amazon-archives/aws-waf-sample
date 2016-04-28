@@ -1,7 +1,7 @@
-# waf-tor-blocking
+# waf-reputation-lists
 
-An AWS Lambda function for importing the TOR exit node list (https://check.torproject.org/exit-addresses) and updating AWS WAF IP Sets in order to deny access from the TOR network.
-Amazon CloudWatch Scheduled Events can be utilised to execute the function regularly in order to automate the update of the IP Sets as the list are updated. 
+An AWS Lambda function for importing multiple IP reputation lists and updating AWS WAF IP Sets in order to deny access from the IP ranges defined in those lists.
+Amazon CloudWatch Scheduled Events is utilised to execute the function regularly in order to automate the update of the IP Sets as the lists are updated. 
 
 The function expects to be passed an event containing the list if WAF IP Set IDs that it will populate with the IP addresses found in the list, using the following format:
 
@@ -13,8 +13,6 @@ The function expects to be passed an event containing the list if WAF IP Set IDs
     ] 
 }
 ```
-
-Please see waf-reputation-lists for a solution that supports multiple reputation lists, including the Tor Exit Node.
  
 ***
 

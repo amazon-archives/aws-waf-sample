@@ -1,0 +1,15 @@
+{
+  "name": "aws-waf-reputation-lists-lambda",
+  "version": "1.0.0",
+  "description": "Lambda function for processing IP reputation lists for AWS WAF",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Lee Atkinson",
+  "license": "SEE LICENSE IN LICENSE.txt",
+  "dependencies": {
+    "async": "^1.5.2",
+    "aws-sdk": "^2.2.33"
+  }
+}
