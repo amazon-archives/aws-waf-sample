@@ -1,0 +1,160 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "This AWS CloudFormation template helps you provision the AWS WAF combined stack without worrying about creating and configuring the underlying AWS infrastructure. **WARNING** This template creates an AWS Lambda function, an AWS WAF Web ACL, an Amazon S3 bucket, and an Amazon CloudWatch custom metric. You will be billed for the AWS resources used if you create a stack from this template. **NOTICE** Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved. Licensed under the Amazon Software License (the License). You may not use this file except in compliance with the License. A copy of the License is located at http://aws.amazon.com/asl/ or in the license file accompanying this file. This file is distributed on an AS IS BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions and limitations under the License.",
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [{
+        "Label": {
+          "default": "S3 Location"
+        },
+        "Parameters": ["CloudFrontCreateAccessLogBucket", "CloudFrontAccessLogBucket"]
+      }, {
+        "Label": {
+          "default": "Protection List"
+        },
+        "Parameters": ["ActivateRateBasedProtectionParam", "ActivateBadBehavingProtectionParam", "ActivateTorBlockingProtectionParam","ActivateBadBotProtectionParam"]
+      }],
+
+      "ParameterLabels": {
+        "CloudFrontCreateAccessLogBucket": {
+          "default": "Create CloudFront Access Log Bucket"
+        },
+        "CloudFrontAccessLogBucket": {
+          "default": "CloudFront Access Log Bucket Name"
+        },
+        "ActivateRateBasedProtectionParam": {
+          "default": "Activate Rate-Based Blacklisting Protection"
+        },
+        "ActivateBadBehavingProtectionParam": {
+          "default": "Activate Bad Behaving Protection"
+        },
+        "ActivateTorBlockingProtectionParam": {
+          "default": "Activate TOR Protection"
+        },
+        "ActivateBadBotProtectionParam": {
+          "default": "Activate Bad Bot Protection"
+        }
+      }
+    }
+  },
+
+  "Parameters": {
+    "CloudFrontCreateAccessLogBucket": {
+      "Type": "String",
+      "Default": "yes",
+      "AllowedValues": ["yes", "no"],
+      "Description": "Select Yes to create a new S3 bucket for CloudFront Access Logs. Select No if you already have an S3 bucket for CloudFront Access logs."
+    },
+    "CloudFrontAccessLogBucket": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Enter the name of the S3 bucket where you will store the CloudFront access logs (e.g., http://bucket.s3-aws-region.amazonaws.com)"
+    },
+    "ActivateRateBasedProtectionParam": {
+      "Type": "String",
+      "Default": "yes",
+      "AllowedValues": ["yes", "no"],
+      "Description": "Select yes if you want to block HTTP Flood attack. The main objective of this kind of distributed denial of service (DDoS) attack is to overburden system resources and make them unavailable to your real users or customers."
+    },
+    "ActivateBadBehavingProtectionParam": {
+      "Type": "String",
+      "Default": "yes",
+      "AllowedValues": ["yes", "no"],
+      "Description": "Select yes if you want to block Bad Behaving sources. Internet-facing web applications are frequently scanned and probed by various sources, sometimes for good and other times to identify weaknesses."
+    },
+    "ActivateTorBlockingProtectionParam": {
+      "Type": "String",
+      "Default": "yes",
+      "AllowedValues": ["yes", "no"],
+      "Description": "Select yes if you want to block requests from Tor nodes. A number of organizations maintain reputation lists of IP addresses used by bad actors. Their goal is to help legitimate companies block access from specific IP addresses and protect their web applications from abuse."
+    },
+    "ActivateBadBotProtectionParam": {
+      "Type": "String",
+      "Default": "yes",
+      "AllowedValues": ["yes", "no"],
+      "Description": "Select yes if you want to block bad bots. These bad actors are typically automated processes: some might try to scrape your content for their own profit (content scrapers), and others might misrepresent who they are to bypass restrictions (bad bots)."
+    }
+  },
+
+  "Conditions": {
+    "CreateBucket": {
+      "Fn::Equals": [{
+        "Ref": "CloudFrontCreateAccessLogBucket"
+      }, "yes"]
+    },
+    "ActivateRateBasedProtection": {
+      "Fn::Equals": [{
+        "Ref": "ActivateRateBasedProtectionParam"
+      }, "yes"]
+    },
+    "ActivateBadBehavingProtection": {
+      "Fn::Equals": [{
+        "Ref": "ActivateBadBehavingProtectionParam"
+      }, "yes"]
+    },
+    "ActivateTorBlockingProtection": {
+      "Fn::Equals": [{
+        "Ref": "ActivateTorBlockingProtectionParam"
+      }, "yes"]
+    },
+    "ActivateBadBotProtection": {
+      "Fn::Equals": [{
+        "Ref": "ActivateBadBotProtectionParam"
+      }, "yes"]
+    }
+  },
+
+  "Resources": {
+    "WAFManualBlockSet": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": "Combined - Manual Block Set"
+      }
+    },
+    "WAFAutoBlockSet": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": "Combined - Auto Block Set"
+      }
+    },
+    "WAFAutoCountSet": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": "Combined - Auto Count Set"
+      }
+    }
+  },
+
+  "Outputs": {
+    "CloudFrontCreateAccessLogBucket": {
+      "Description": "Create CloudFront  Access Logs Bucket",
+      "Value": {
+        "Ref": "CloudFrontCreateAccessLogBucket"
+      }
+    },
+    "ActivateRateBasedProtection": {
+      "Description": "Activate Rate Based Protection",
+      "Value": {
+        "Ref": "ActivateRateBasedProtectionParam"
+      }
+    },
+    "ActivateBadBehavingProtection": {
+      "Description": "Activate Bad Behaving Protection",
+      "Value": {
+        "Ref": "ActivateBadBehavingProtectionParam"
+      }
+    },
+    "ActivateTorBlockingProtection": {
+      "Description": "Activate Tor Blocking Protection",
+      "Value": {
+        "Ref": "ActivateTorBlockingProtectionParam"
+      }
+    },
+    "ActivateBadBotProtection": {
+      "Description": "Activate Bad Bot Protection",
+      "Value": {
+        "Ref": "ActivateBadBotProtectionParam"
+      }
+    }
+  }
+}
