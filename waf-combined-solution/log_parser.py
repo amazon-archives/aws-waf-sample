@@ -36,7 +36,7 @@ BLOCK_ERROR_CODES = ['400','403','404','405'] # error codes to parse logs for
 LIMIT_IP_ADDRESS_RANGES_PER_IP_MATCH_CONDITION = 1000
 API_CALL_NUM_RETRIES = 3
 
-OUTPUT_FILE_NAME = 'current_blocked_requesters.json'
+OUTPUT_FILE_NAME = 'combined_current_blocked_requesters.json'
 
 # Fixed
 LINE_FORMAT = {
@@ -49,16 +49,6 @@ LINE_FORMAT = {
 REQUEST_COUNTER_INDEX = 0
 ERROR_COUNTER_INDEX = 1
 
-# TODO: remove this
-# OUTPUT_BUCKET = 'heitorc'
-# IP_SET_ID_MANUAL_BLOCK = 'd3e36861-b13d-4aff-a0c4-62231de13548'
-# IP_SET_ID_AUTO_BLOCK = '201e6f34-be6d-441a-bc50-eb44ca7fadfb'
-# IP_SET_ID_AUTO_COUNT = 'eb15fae8-4bb9-44ec-a465-c13deaaa04ac'
-
-# BLACKLIST_BLOCK_PERIOD = 240 # in minutes
-# BLACKLIST_COUNT_PERIOD = 240 # in minutes
-# REQUEST_PER_MINUTE_LIMIT = -1
-# ERROR_PER_MINUTE_LIMIT = 55
 
 #======================================================================================================================
 # Auxiliary Functions
@@ -495,9 +485,3 @@ def lambda_handler(event, context):
     except Exception as e:
         raise e
     print '[lambda_handler] End'
-
-# if __name__ == '__main__':
-#     bucket_name = 'heitorc'
-#     file_name = 'access_log_sample.gz'
-#     event = {'Records':[{'s3':{'bucket':{'name':bucket_name},'object':{'key':file_name}}}]}
-#     lambda_handler(event, None)

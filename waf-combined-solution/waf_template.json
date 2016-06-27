@@ -350,6 +350,8 @@
           "Fn::Join": [":", [{
             "Ref": "RequestThreshold"
           }, {
+            "Ref": "ErrorThreshold"
+          }, {
             "Ref": "WAFBlockPeriod"
           }, {
             "Ref": "WAFQuarantinePeriod"
