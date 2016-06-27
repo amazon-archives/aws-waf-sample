@@ -145,14 +145,15 @@
     },
     "LogParserActivated": {
       "Fn::Or": [
-        {"Fn::Equals": [{"Ref": "ActivateHttpFloodProtectionParam"}, "yes"]},
-        {"Fn::Equals": [{"Ref": "ActivateScansProbesProtectionParam"}, "yes"]}
+        {"Condition" : "HttpFloodProtectionActivated"},
+        {"Condition" : "ScansProbesProtectionActivated"}
       ]
     },
     "CreateBucket": {
-      "Fn::Equals": [{
-        "Ref": "CloudFrontCreateAccessLogBucket"
-      }, "yes"]
+      "Fn::And": [
+        {"Fn::Equals": [{"Ref": "CloudFrontCreateAccessLogBucket"}, "yes"]},
+        {"Condition" : "LogParserActivated"}
+      ]
     }
   },
 
@@ -262,6 +263,154 @@
         }]
       },
       "Condition": "LogParserActivated"
+    },
+    "LambdaRoleLogParser": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Version": "2012-10-17",
+          "Statement": [{
+            "Effect": "Allow",
+            "Principal": {
+              "Service": ["lambda.amazonaws.com"]
+            },
+            "Action": ["sts:AssumeRole"]
+          }]
+        },
+        "Path": "/",
+        "Policies": [{
+          "PolicyName": "S3Access",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "s3:*",
+              "Resource": "*"
+            }]
+          }
+        }, {
+          "PolicyName": "WAFAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "waf:*",
+              "Resource": "*"
+            }]
+          }
+        }, {
+          "PolicyName": "LogsAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "logs:*",
+              "Resource": "*"
+            }]
+          }
+        }, {
+          "PolicyName": "LambdAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "lambda:*",
+              "Resource": "*"
+            }]
+          }
+        }, {
+          "PolicyName": "CloudFormationAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "cloudformation:DescribeStacks",
+              "Resource": "*"
+            }]
+          }
+        }, {
+          "PolicyName": "CloudWatchAccess",
+          "PolicyDocument": {
+            "Version": "2012-10-17",
+            "Statement": [{
+              "Effect": "Allow",
+              "Action": "cloudwatch:PutMetricData",
+              "Resource": "*"
+            }]
+          }
+        }]
+      },
+      "Condition": "LogParserActivated"
+    },
+    "LambdaWAFLogParserFunction": {
+      "Type": "AWS::Lambda::Function",
+      "DependsOn": "LambdaRoleLogParser",
+      "Properties": {
+        "Description": {
+          "Fn::Join": [":", [{
+            "Ref": "RequestThreshold"
+          }, {
+            "Ref": "WAFBlockPeriod"
+          }, {
+            "Ref": "WAFQuarantinePeriod"
+          }]]
+        },
+        "Handler": "parser.lambda_handler",
+        "Role": {
+          "Fn::GetAtt": ["LambdaRoleLogParser", "Arn"]
+        },
+        "Code": {
+          "S3Bucket": {"Fn::Join": [".", [{ "Ref" : "AWS::Region" },"heitorc"]]},
+          "S3Key": "waf-reactive-blacklist/parser.zip"
+        },
+        "Runtime": "python2.7",
+        "MemorySize": "512",
+        "Timeout": "60"
+      },
+      "Condition": "LogParserActivated"
+    },
+    "LambdaInvokePermissionLogParser": {
+      "Type": "AWS::Lambda::Permission",
+      "DependsOn": "LambdaWAFLogParserFunction",
+      "Properties": {
+        "FunctionName": {
+          "Fn::GetAtt": ["LambdaWAFLogParserFunction", "Arn"]
+        },
+        "Action": "lambda:*",
+        "Principal": "s3.amazonaws.com",
+        "SourceAccount": {
+          "Ref": "AWS::AccountId"
+        }
+      },
+      "Condition": "LogParserActivated"
+    },
+    "S3CloudFrontAccessLogBucket": {
+      "Type": "AWS::S3::Bucket",
+      "DependsOn": "LambdaWAFLogParserFunction",
+      "Properties": {
+        "BucketName": {
+          "Ref": "CloudFrontAccessLogBucket"
+        },
+        "AccessControl": "Private",
+        "NotificationConfiguration": {
+          "LambdaConfigurations": [{
+            "Event": "s3:ObjectCreated:*",
+            "Filter": {
+              "S3Key": {
+                "Rules": [{
+                  "Name": "suffix",
+                  "Value": "gz"
+                }]
+              }
+            },
+            "Function": {
+              "Fn::GetAtt": ["LambdaWAFLogParserFunction", "Arn"]
+            }
+          }]
+        }
+      },
+      "DeletionPolicy": "Retain",
+      "Condition" : "CreateBucket"
     }
   },
 
@@ -326,6 +475,24 @@
         "Ref": "WAFQuarantinePeriod"
       },
       "Condition": "LogParserActivated"
+    },
+    "ManualBlockIPSetID": {
+      "Description": "Manual Block IP Set ID",
+      "Value": {
+        "Ref": "WAFManualBlockSet"
+      }
+    },
+    "AutoBlockIPSetID": {
+      "Description": "Auto Block IP Set ID",
+      "Value": {
+        "Ref": "WAFAutoBlockSet"
+      }
+    },
+    "AutoCountIPSetID": {
+      "Description": "Auto Count IP Set ID",
+      "Value": {
+        "Ref": "WAFAutoCountSet"
+      }
     }
   }
 }
