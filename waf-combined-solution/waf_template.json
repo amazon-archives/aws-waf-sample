@@ -7,7 +7,7 @@
         "Label": {
           "default": "Protection List"
         },
-        "Parameters": ["ActivateRateBasedProtectionParam", "ActivateBadBehavingProtectionParam", "ActivateTorBlockingProtectionParam","ActivateBadBotProtectionParam"]
+        "Parameters": ["ActivateHttpFloodProtectionParam", "ActivateScansProbesProtectionParam", "ActivateTorBlockingProtectionParam","ActivateBadBotProtectionParam"]
       }, {
         "Label": {
           "default": "Advanced Settings"
@@ -16,10 +16,10 @@
       }],
 
       "ParameterLabels": {
-        "ActivateRateBasedProtectionParam": {
+        "ActivateHttpFloodProtectionParam": {
           "default": "Activate Rate-Based Blacklisting Protection?"
         },
-        "ActivateBadBehavingProtectionParam": {
+        "ActivateScansProbesProtectionParam": {
           "default": "Activate Bad Behaving Protection?"
         },
         "ActivateTorBlockingProtectionParam": {
@@ -57,13 +57,13 @@
   },
 
   "Parameters": {
-    "ActivateRateBasedProtectionParam": {
+    "ActivateHttpFloodProtectionParam": {
       "Type": "String",
       "Default": "yes",
       "AllowedValues": ["yes", "no"],
       "Description": "Select yes if you want to block HTTP Flood attack. The main objective of this kind of distributed denial of service (DDoS) attack is to overburden system resources and make them unavailable to your real users or customers."
     },
-    "ActivateBadBehavingProtectionParam": {
+    "ActivateScansProbesProtectionParam": {
       "Type": "String",
       "Default": "yes",
       "AllowedValues": ["yes", "no"],
@@ -123,14 +123,14 @@
   },
 
   "Conditions": {
-    "RateBasedProtectionActivated": {
+    "HttpFloodProtectionActivated": {
       "Fn::Equals": [{
-        "Ref": "ActivateRateBasedProtectionParam"
+        "Ref": "ActivateHttpFloodProtectionParam"
       }, "yes"]
     },
-    "BadBehavingProtectionActivated": {
+    "ScansProbesProtectionActivated": {
       "Fn::Equals": [{
-        "Ref": "ActivateBadBehavingProtectionParam"
+        "Ref": "ActivateScansProbesProtectionParam"
       }, "yes"]
     },
     "TorBlockingProtectionActivated": {
@@ -145,8 +145,8 @@
     },
     "LogParserActivated": {
       "Fn::Or": [
-        {"Fn::Equals": [{"Ref": "ActivateRateBasedProtectionParam"}, "yes"]},
-        {"Fn::Equals": [{"Ref": "ActivateBadBehavingProtectionParam"}, "yes"]}
+        {"Fn::Equals": [{"Ref": "ActivateHttpFloodProtectionParam"}, "yes"]},
+        {"Fn::Equals": [{"Ref": "ActivateScansProbesProtectionParam"}, "yes"]}
       ]
     },
     "CreateBucket": {
@@ -229,16 +229,16 @@
   },
 
   "Outputs": {
-    "ActivateRateBasedProtection": {
+    "ActivateHttpFloodProtection": {
       "Description": "Activate Rate Based Protection",
       "Value": {
-        "Ref": "ActivateRateBasedProtectionParam"
+        "Ref": "ActivateHttpFloodProtectionParam"
       }
     },
-    "ActivateBadBehavingProtection": {
+    "ActivateScansProbesProtection": {
       "Description": "Activate Bad Behaving Protection",
       "Value": {
-        "Ref": "ActivateBadBehavingProtectionParam"
+        "Ref": "ActivateScansProbesProtectionParam"
       }
     },
     "ActivateTorBlockingProtection": {
