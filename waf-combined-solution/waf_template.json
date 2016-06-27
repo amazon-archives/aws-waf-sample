@@ -5,51 +5,58 @@
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [{
         "Label": {
-          "default": "S3 Location"
-        },
-        "Parameters": ["CloudFrontCreateAccessLogBucket", "CloudFrontAccessLogBucket"]
-      }, {
-        "Label": {
           "default": "Protection List"
         },
         "Parameters": ["ActivateRateBasedProtectionParam", "ActivateBadBehavingProtectionParam", "ActivateTorBlockingProtectionParam","ActivateBadBotProtectionParam"]
+      }, {
+        "Label": {
+          "default": "Advanced Settings"
+        },
+        "Parameters": ["CloudFrontCreateAccessLogBucket", "CloudFrontAccessLogBucket", "RequestThreshold", "ErrorThreshold", "WAFBlockPeriod", "WAFQuarantinePeriod", "TorIPListUpdateRate"]
       }],
 
       "ParameterLabels": {
+        "ActivateRateBasedProtectionParam": {
+          "default": "Activate Rate-Based Blacklisting Protection?"
+        },
+        "ActivateBadBehavingProtectionParam": {
+          "default": "Activate Bad Behaving Protection?"
+        },
+        "ActivateTorBlockingProtectionParam": {
+          "default": "Activate TOR Protection?"
+        },
+        "ActivateBadBotProtectionParam": {
+          "default": "Activate Bad Bot Protection?"
+        },
+
         "CloudFrontCreateAccessLogBucket": {
-          "default": "Create CloudFront Access Log Bucket"
+          "default": "Create CloudFront Access Log Bucket?"
         },
         "CloudFrontAccessLogBucket": {
           "default": "CloudFront Access Log Bucket Name"
         },
-        "ActivateRateBasedProtectionParam": {
-          "default": "Activate Rate-Based Blacklisting Protection"
+
+        "RequestThreshold": {
+          "default": "Request Threshold"
         },
-        "ActivateBadBehavingProtectionParam": {
-          "default": "Activate Bad Behaving Protection"
+        "ErrorThreshold": {
+          "default": "Error Threshold"
         },
-        "ActivateTorBlockingProtectionParam": {
-          "default": "Activate TOR Protection"
+        "WAFBlockPeriod": {
+          "default": "WAF Block Period"
         },
-        "ActivateBadBotProtectionParam": {
-          "default": "Activate Bad Bot Protection"
+        "WAFQuarantinePeriod": {
+          "default": "WAF Quarantine Period"
+        },
+
+        "TorIPListUpdateRate": {
+          "default": "Tor IP list update rate"
         }
       }
     }
   },
 
   "Parameters": {
-    "CloudFrontCreateAccessLogBucket": {
-      "Type": "String",
-      "Default": "yes",
-      "AllowedValues": ["yes", "no"],
-      "Description": "Select Yes to create a new S3 bucket for CloudFront Access Logs. Select No if you already have an S3 bucket for CloudFront Access logs."
-    },
-    "CloudFrontAccessLogBucket": {
-      "Type": "String",
-      "Default": "",
-      "Description": "Enter the name of the S3 bucket where you will store the CloudFront access logs (e.g., http://bucket.s3-aws-region.amazonaws.com)"
-    },
     "ActivateRateBasedProtectionParam": {
       "Type": "String",
       "Default": "yes",
@@ -73,33 +80,78 @@
       "Default": "yes",
       "AllowedValues": ["yes", "no"],
       "Description": "Select yes if you want to block bad bots. These bad actors are typically automated processes: some might try to scrape your content for their own profit (content scrapers), and others might misrepresent who they are to bypass restrictions (bad bots)."
+    },
+
+    "CloudFrontCreateAccessLogBucket": {
+      "Type": "String",
+      "Default": "yes",
+      "AllowedValues": ["yes", "no"],
+      "Description": "Select Yes to create a new S3 bucket for CloudFront Access Logs. Select No if you already have an S3 bucket for CloudFront Access logs."
+    },
+    "CloudFrontAccessLogBucket": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Enter the name of the S3 bucket where you will store the CloudFront access logs (e.g., http://bucket.s3-aws-region.amazonaws.com)"
+    },
+
+    "RequestThreshold": {
+      "Type": "Number",
+      "Default": "400",
+      "Description": "Enter the maximum acceptable request per second per IP address. Leave it empty to deactivate this feature. Default: 400 requests per minute"
+    },
+    "ErrorThreshold": {
+      "Type": "Number",
+      "Default": "50",
+      "Description": "Enter the maximum bad requests per minute to accept, per IP. Leave it empty to deactivate this feature. Default: 50 errors per minute"
+    },
+    "WAFBlockPeriod": {
+      "Type": "Number",
+      "Default": "240",
+      "Description": "Enter for how long (in minutes) IP addresses should be blocked. Default: 4 hours (240 minutes)"
+    },
+    "WAFQuarantinePeriod": {
+      "Type": "Number",
+      "Default": "240",
+      "Description": "Enter for how long (in minutes) IP addresses should be kept in quarantine. Default: 4 hours (240 minutes)"
+    },
+
+    "TorIPListUpdateRate": {
+      "Type": "Number",
+      "Default": "1440",
+      "Description": "Enter the interval (in minutes) that the system will check for TOR IP list update. Default: 1440 (once a day)."
     }
   },
 
   "Conditions": {
-    "CreateBucket": {
-      "Fn::Equals": [{
-        "Ref": "CloudFrontCreateAccessLogBucket"
-      }, "yes"]
-    },
-    "ActivateRateBasedProtection": {
+    "RateBasedProtectionActivated": {
       "Fn::Equals": [{
         "Ref": "ActivateRateBasedProtectionParam"
       }, "yes"]
     },
-    "ActivateBadBehavingProtection": {
+    "BadBehavingProtectionActivated": {
       "Fn::Equals": [{
         "Ref": "ActivateBadBehavingProtectionParam"
       }, "yes"]
     },
-    "ActivateTorBlockingProtection": {
+    "TorBlockingProtectionActivated": {
       "Fn::Equals": [{
         "Ref": "ActivateTorBlockingProtectionParam"
       }, "yes"]
     },
-    "ActivateBadBotProtection": {
+    "BadBotProtectionActivated": {
       "Fn::Equals": [{
         "Ref": "ActivateBadBotProtectionParam"
+      }, "yes"]
+    },
+    "LogParserActivated": {
+      "Fn::Or": [
+        {"Fn::Equals": [{"Ref": "ActivateRateBasedProtectionParam"}, "yes"]},
+        {"Fn::Equals": [{"Ref": "ActivateBadBehavingProtectionParam"}, "yes"]}
+      ]
+    },
+    "CreateBucket": {
+      "Fn::Equals": [{
+        "Ref": "CloudFrontCreateAccessLogBucket"
       }, "yes"]
     }
   },
@@ -109,29 +161,74 @@
       "Type": "AWS::WAF::IPSet",
       "Properties": {
         "Name": "Combined - Manual Block Set"
-      }
+      },
+      "Condition": "LogParserActivated"
     },
     "WAFAutoBlockSet": {
       "Type": "AWS::WAF::IPSet",
       "Properties": {
         "Name": "Combined - Auto Block Set"
-      }
+      },
+      "Condition": "LogParserActivated"
     },
     "WAFAutoCountSet": {
       "Type": "AWS::WAF::IPSet",
       "Properties": {
         "Name": "Combined - Auto Count Set"
-      }
+      },
+      "Condition": "LogParserActivated"
+    },
+    "WAFManualBlockRule": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFManualBlockSet",
+      "Properties": {
+        "Name": "Combined - Manual Block Rule",
+        "MetricName": "CombinedManualBlockRule",
+        "Predicates": [{
+          "DataId": {
+            "Ref": "WAFManualBlockSet"
+          },
+          "Negated": false,
+          "Type": "IPMatch"
+        }]
+      },
+      "Condition": "LogParserActivated"
+    },
+    "WAFAutoBlockRule": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFAutoBlockSet",
+      "Properties": {
+        "Name": "Combined - Auto Block Rule",
+        "MetricName": "CombinedAutoBlockRule",
+        "Predicates": [{
+          "DataId": {
+            "Ref": "WAFAutoBlockSet"
+          },
+          "Negated": false,
+          "Type": "IPMatch"
+        }]
+      },
+      "Condition": "LogParserActivated"
+    },
+    "WAFAutoCountRule": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFAutoCountSet",
+      "Properties": {
+        "Name": "Combined - Auto Count Rule",
+        "MetricName": "CombinedAutoCountRule",
+        "Predicates": [{
+          "DataId": {
+            "Ref": "WAFAutoCountSet"
+          },
+          "Negated": false,
+          "Type": "IPMatch"
+        }]
+      },
+      "Condition": "LogParserActivated"
     }
   },
 
   "Outputs": {
-    "CloudFrontCreateAccessLogBucket": {
-      "Description": "Create CloudFront  Access Logs Bucket",
-      "Value": {
-        "Ref": "CloudFrontCreateAccessLogBucket"
-      }
-    },
     "ActivateRateBasedProtection": {
       "Description": "Activate Rate Based Protection",
       "Value": {
@@ -155,6 +252,43 @@
       "Value": {
         "Ref": "ActivateBadBotProtectionParam"
       }
+    },
+
+    "CloudFrontAccessLogBucket": {
+      "Description": "CloudFront Access Log Bucket",
+      "Value": {
+        "Ref": "CloudFrontAccessLogBucket"
+      },
+      "Condition": "CreateBucket"
+    },
+
+    "RequestThreshold": {
+      "Description": "Request Threshold",
+      "Value": {
+        "Ref": "RequestThreshold"
+      },
+      "Condition": "LogParserActivated"
+    },
+    "ErrorThreshold": {
+      "Description": "Error Threshold",
+      "Value": {
+        "Ref": "ErrorThreshold"
+      },
+      "Condition": "LogParserActivated"
+    },
+    "WAFBlockPeriod": {
+      "Description": "WAF Block Period",
+      "Value": {
+        "Ref": "WAFBlockPeriod"
+      },
+      "Condition": "LogParserActivated"
+    },
+    "WAFQuarantinePeriod": {
+      "Description": "WAF Quarantine Period",
+      "Value": {
+        "Ref": "WAFQuarantinePeriod"
+      },
+      "Condition": "LogParserActivated"
     }
   }
 }
