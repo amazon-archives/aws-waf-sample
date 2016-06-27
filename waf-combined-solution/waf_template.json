@@ -17,10 +17,10 @@
 
       "ParameterLabels": {
         "ActivateHttpFloodProtectionParam": {
-          "default": "Activate Rate-Based Blacklisting Protection?"
+          "default": "Activate HTTP Flood Protection?"
         },
         "ActivateScansProbesProtectionParam": {
-          "default": "Activate Bad Behaving Protection?"
+          "default": "Activate Scans & Probes Protection?"
         },
         "ActivateTorBlockingProtectionParam": {
           "default": "Activate TOR Protection?"
@@ -67,7 +67,7 @@
       "Type": "String",
       "Default": "yes",
       "AllowedValues": ["yes", "no"],
-      "Description": "Select yes if you want to block Bad Behaving sources. Internet-facing web applications are frequently scanned and probed by various sources, sometimes for good and other times to identify weaknesses."
+      "Description": "Select yes if you want to block Scans & Probes sources. Internet-facing web applications are frequently scanned and probed by various sources, sometimes for good and other times to identify weaknesses."
     },
     "ActivateTorBlockingProtectionParam": {
       "Type": "String",
@@ -222,6 +222,43 @@
           },
           "Negated": false,
           "Type": "IPMatch"
+        }]
+      },
+      "Condition": "LogParserActivated"
+    },
+    "WAFWebACL": {
+      "Type": "AWS::WAF::WebACL",
+      "DependsOn": ["WAFManualBlockRule", "WAFAutoBlockRule", "WAFAutoCountRule"],
+      "Properties": {
+        "Name": "Combined - Malicious Requesters",
+        "DefaultAction": {
+          "Type": "ALLOW"
+        },
+        "MetricName": "CombinedMaliciousRequesters",
+        "Rules": [{
+          "Action": {
+            "Type": "BLOCK"
+          },
+          "Priority": 1,
+          "RuleId": {
+            "Ref": "WAFManualBlockRule"
+          }
+        }, {
+          "Action": {
+            "Type": "BLOCK"
+          },
+          "Priority": 2,
+          "RuleId": {
+            "Ref": "WAFAutoBlockRule"
+          }
+        }, {
+          "Action": {
+            "Type": "COUNT"
+          },
+          "Priority": 3,
+          "RuleId": {
+            "Ref": "WAFAutoCountRule"
+          }
         }]
       },
       "Condition": "LogParserActivated"
