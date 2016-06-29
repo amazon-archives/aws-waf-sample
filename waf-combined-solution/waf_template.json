@@ -12,7 +12,7 @@
         "Label": {
           "default": "Advanced Settings"
         },
-        "Parameters": ["CloudFrontCreateAccessLogBucket", "CloudFrontAccessLogBucket", "RequestThreshold", "ErrorThreshold", "WAFBlockPeriod", "WAFQuarantinePeriod", "TorIPListUpdateRate"]
+        "Parameters": ["CloudFrontCreateAccessLogBucket", "CloudFrontAccessLogBucket", "RequestThreshold", "ErrorThreshold", "WAFBlockPeriod", "WAFQuarantinePeriod", "ReputationLists"]
       }],
 
       "ParameterLabels": {
@@ -49,8 +49,8 @@
           "default": "WAF Quarantine Period"
         },
 
-        "TorIPListUpdateRate": {
-          "default": "Tor IP list update rate"
+        "ReputationLists": {
+          "default": "Reputation lists sources"
         }
       }
     }
@@ -115,10 +115,10 @@
       "Description": "Enter for how long (in minutes) IP addresses should be kept in quarantine. Default: 4 hours (240 minutes)"
     },
 
-    "TorIPListUpdateRate": {
-      "Type": "Number",
-      "Default": "1440",
-      "Description": "Enter the interval (in minutes) that the system will check for TOR IP list update. Default: 1440 (once a day)."
+    "ReputationLists": {
+      "Type": "String",
+      "Default": "[{\"url\":\"https://www.spamhaus.org/drop/drop.txt\"},{\"url\":\"https://check.torproject.org/exit-addresses\",\"prefix\":\"ExitAddress \"},{\"url\":\"https://rules.emergingthreats.net/fwrules/emerging-Block-IPs.txt\"}]",
+      "Description": "IP reputation lists, in a JSON-formatted array of objects. Each object should have a 'url' property and optional 'prefix' in regular expressions format"
     }
   },
 
@@ -162,22 +162,31 @@
       "Type": "AWS::WAF::IPSet",
       "Properties": {
         "Name": "Combined - Manual Block Set"
-      },
-      "Condition": "LogParserActivated"
+      }
     },
     "WAFAutoBlockSet": {
       "Type": "AWS::WAF::IPSet",
       "Properties": {
         "Name": "Combined - Auto Block Set"
-      },
-      "Condition": "LogParserActivated"
+      }
     },
     "WAFAutoCountSet": {
       "Type": "AWS::WAF::IPSet",
       "Properties": {
         "Name": "Combined - Auto Count Set"
-      },
-      "Condition": "LogParserActivated"
+      }
+    },
+    "WAFReputationListsSet1": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": "Combined - IP Reputation Lists Set #1"
+      }
+    },
+    "WAFReputationListsSet2": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": "Combined - IP Set Reputation Lists #2"
+      }
     },
     "WAFManualBlockRule": {
       "Type": "AWS::WAF::Rule",
@@ -192,8 +201,7 @@
           "Negated": false,
           "Type": "IPMatch"
         }]
-      },
-      "Condition": "LogParserActivated"
+      }
     },
     "WAFAutoBlockRule": {
       "Type": "AWS::WAF::Rule",
@@ -208,8 +216,7 @@
           "Negated": false,
           "Type": "IPMatch"
         }]
-      },
-      "Condition": "LogParserActivated"
+      }
     },
     "WAFAutoCountRule": {
       "Type": "AWS::WAF::Rule",
@@ -224,12 +231,44 @@
           "Negated": false,
           "Type": "IPMatch"
         }]
-      },
-      "Condition": "LogParserActivated"
+      }
     },
+    "WAFIPReputationListsRule1": {
+      "Type": "AWS::WAF::Rule",
+      "Properties": {
+        "Name": "Combined - WAF IP Reputation Lists Rule #1",
+        "MetricName": "WAFIPReputationListsRule1",
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFReputationListsSet1"
+            },
+            "Type": "IPMatch",
+            "Negated": "false"
+          }
+        ]
+      }
+    },
+    "WAFIPReputationListsRule2": {
+      "Type": "AWS::WAF::Rule",
+      "Properties": {
+        "Name": "Combined - WAF IP Reputation Lists Rule #2",
+        "MetricName": "WAFIPReputationListsRule2",
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFReputationListsSet2"
+            },
+            "Type": "IPMatch",
+            "Negated": "false"
+          }
+        ]
+      }
+    },
+
     "WAFWebACL": {
       "Type": "AWS::WAF::WebACL",
-      "DependsOn": ["WAFManualBlockRule", "WAFAutoBlockRule", "WAFAutoCountRule"],
+      "DependsOn": ["WAFManualBlockRule", "WAFAutoBlockRule", "WAFAutoCountRule", "WAFIPReputationListsRule1", "WAFIPReputationListsRule2"],
       "Properties": {
         "Name": "Combined - Malicious Requesters",
         "DefaultAction": {
@@ -254,15 +293,30 @@
           }
         }, {
           "Action": {
-            "Type": "COUNT"
+            "Type": "BLOCK"
           },
           "Priority": 3,
+          "RuleId": {
+            "Ref": "WAFIPReputationListsRule1"
+          }
+        }, {
+          "Action": {
+            "Type": "BLOCK"
+          },
+          "Priority": 4,
+          "RuleId": {
+            "Ref": "WAFIPReputationListsRule2"
+          }
+        }, {
+          "Action": {
+            "Type": "COUNT"
+          },
+          "Priority": 5,
           "RuleId": {
             "Ref": "WAFAutoCountRule"
           }
         }]
-      },
-      "Condition": "LogParserActivated"
+      }
     },
     "LambdaRoleLogParser": {
       "Type": "AWS::IAM::Role",
@@ -386,6 +440,183 @@
       },
       "Condition": "LogParserActivated"
     },
+    "LambdaRoleReputationListsParser": {
+      "Type": "AWS::IAM::Role",
+      "Properties": {
+        "AssumeRolePolicyDocument": {
+          "Statement": [
+            {
+              "Effect": "Allow",
+              "Principal": {
+                "Service": [
+                  "lambda.amazonaws.com"
+                ]
+              },
+              "Action": "sts:AssumeRole"
+            }
+          ]
+        },
+        "Policies": [
+          {
+            "PolicyName": "CloudWatchLogs",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "logs:*",
+                  "Resource": "*"
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "WAFGetChangeToken",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": "waf:GetChangeToken",
+                  "Resource": "*"
+                }
+              ]
+            }
+          },
+          {
+            "PolicyName": "WAFGetAndUpdateIPSet",
+            "PolicyDocument": {
+              "Statement": [
+                {
+                  "Effect": "Allow",
+                  "Action": [
+                    "waf:GetIPSet",
+                    "waf:UpdateIPSet"
+                  ],
+                  "Resource": [
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:waf::",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":ipset/",
+                          {
+                            "Ref": "WAFReputationListsSet1"
+                          }
+                        ]
+                    ]
+                    },
+                    {
+                      "Fn::Join": [
+                        "",
+                        [
+                          "arn:aws:waf::",
+                          {
+                            "Ref": "AWS::AccountId"
+                          },
+                          ":ipset/",
+                          {
+                            "Ref": "WAFReputationListsSet2"
+                          }
+                        ]
+                      ]
+                    }
+                  ]
+                }
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "LambdaWAFReputationListsParserFunction": {
+      "Type": "AWS::Lambda::Function",
+      "Properties": {
+        "Handler": "index.handler",
+        "Role": {
+          "Fn::GetAtt": [
+            "LambdaRoleReputationListsParser",
+            "Arn"
+          ]
+        },
+        "Code": {
+          "S3Bucket": {
+            "Fn::Join": [
+              ".",
+              [
+                "awswaf",
+                {
+                  "Ref": "AWS::Region"
+                }
+              ]
+            ]
+          },
+          "S3Key": "waf-reputation-lists/lambda.zip"
+        },
+        "Runtime": "nodejs",
+        "MemorySize": "512",
+        "Timeout": "60"
+      }
+    },
+    "LambdaWAFReputationListsParserEventsRule": {
+      "Type": "AWS::Events::Rule",
+      "Properties": {
+        "Description": "Combined - WAF Reputation Lists",
+        "ScheduleExpression": "rate(1 hour)",
+        "Targets": [
+          {
+            "Arn": {
+              "Fn::GetAtt": [
+                "LambdaWAFReputationListsParserFunction",
+                "Arn"
+              ]
+            },
+            "Id": "LambdaWAFReputationListsParserFunction",
+            "Input": {
+              "Fn::Join": [
+                "",
+                [
+                  "{\"lists\":",
+                  {
+                      "Ref": "ReputationLists"
+                  },
+                  ",",
+                  "\"ipSetIds\": [",
+                  "\"",
+                  {
+                      "Ref": "WAFReputationListsSet1"
+                  },
+                  "\",",
+                  "\"",
+                  {
+                      "Ref": "WAFReputationListsSet2"
+                  },
+                  "\"",
+                  "]}"
+                ]
+              ]
+            }
+          }
+        ]
+      }
+    },
+    "LambdaInvokePermissionReputationListsParser": {
+      "Type": "AWS::Lambda::Permission",
+      "Properties": {
+        "FunctionName": {
+          "Ref": "LambdaWAFReputationListsParserFunction"
+        },
+        "Action": "lambda:InvokeFunction",
+        "Principal": "events.amazonaws.com",
+        "SourceArn": {
+          "Fn::GetAtt": [
+            "LambdaWAFReputationListsParserEventsRule",
+            "Arn"
+          ]
+        }
+      }
+    },
     "S3CloudFrontAccessLogBucket": {
       "Type": "AWS::S3::Bucket",
       "DependsOn": "LambdaWAFLogParserFunction",
@@ -427,18 +658,6 @@
       "Description": "Activate Bad Behaving Protection",
       "Value": {
         "Ref": "ActivateScansProbesProtectionParam"
-      }
-    },
-    "ActivateTorBlockingProtection": {
-      "Description": "Activate Tor Blocking Protection",
-      "Value": {
-        "Ref": "ActivateTorBlockingProtectionParam"
-      }
-    },
-    "ActivateBadBotProtection": {
-      "Description": "Activate Bad Bot Protection",
-      "Value": {
-        "Ref": "ActivateBadBotProtectionParam"
       }
     },
 
