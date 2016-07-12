@@ -1,0 +1,164 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS WAF Sample - Byte URI Example Conditions and Rules 1",
+  "Parameters": {
+    "ByteURIRule1": {
+      "Type": "String",
+      "Default": "ByteURIRule1",
+      "Description": "Enter the name of the byte URI rule 1. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "ByteURICondition1": {
+      "Type": "String",
+      "Default": "ByteURICondition1",
+      "Description": "Enter the name of the byte URI condition 1. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "WhiteListIPCondition1": {
+      "Type": "String",
+      "Description": "Enter the ID of the WhiteList IP condition 1."
+    }
+  },
+  "Resources": {
+    "WAFByteURICondition1": {
+      "Type": "AWS::WAF::ByteMatchSet",
+      "Properties": {
+        "Name": {
+          "Ref": "ByteURICondition1"
+        },
+        "ByteMatchTuples": [
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "config.",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "install.",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "shell.",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "update.",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": ".conf",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": ".log",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": ".ini",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "/var/",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "/etc/",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "/opt/",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          }
+        ]
+      }
+    },
+    "WAFByteURIRule1": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFByteURICondition1",
+      "Properties": {
+        "Name": {
+          "Ref": "ByteURIRule1"
+        },
+        "MetricName": {
+          "Ref": "ByteURIRule1"
+        },
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFByteURICondition1"
+            },
+            "Negated": false,
+            "Type": "ByteMatch"
+          },
+          {
+            "DataId": {
+              "Ref": "WhiteListIPCondition1"
+            },
+            "Negated": true,
+            "Type": "IPMatch"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WAFByteURICondition1ID": {
+      "Description": "Byte URI Condition ID 1",
+      "Value": {
+        "Ref": "WAFByteURICondition1"
+      }
+    },
+    "WAFByteURIRule1ID": {
+      "Description": "Byte URI Rule ID 1",
+      "Value": {
+        "Ref": "WAFByteURIRule1"
+      }
+    }
+  }
+}

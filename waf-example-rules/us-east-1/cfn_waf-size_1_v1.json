@@ -1,0 +1,103 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS WAF Sample - Size Example Conditions and Rules 1",
+  "Parameters": {
+    "SizeRule1": {
+      "Type": "String",
+      "Default": "SizeRule1",
+      "Description": "Enter the name of the size rule. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "SizeCondition1": {
+      "Type": "String",
+      "Default": "SizeCondition1",
+      "Description": "Enter the name of the size condition. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "SizeURI1": {
+      "Type": "String",
+      "Default": "8192",
+      "Description": "Enter the size limit of the URI."
+    },
+    "SizeQuery1": {
+      "Type": "String",
+      "Default": "8192",
+      "Description": "Enter the size limit of the query string."
+    },
+    "WhiteListIPCondition1": {
+      "Type": "String",
+      "Description": "Enter the ID of the WhiteList IP condition 1."
+    }
+  },
+  "Resources": {
+    "WAFSizeCondition1": {
+      "Type": "AWS::WAF::SizeConstraintSet",
+      "Properties": {
+        "Name": {
+          "Ref": "SizeCondition1"
+        },
+        "SizeConstraints": [
+          {
+            "FieldToMatch": {
+              "Type": "QUERY_STRING"
+            },
+            "ComparisonOperator": "GT",
+            "Size": {
+              "Ref": "SizeQuery1"
+            },
+            "TextTransformation": "NONE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI"
+            },
+            "ComparisonOperator": "GT",
+            "Size": {
+              "Ref": "SizeURI1"
+            },
+            "TextTransformation": "NONE"
+          }
+        ]
+      }
+    },
+    "WAFSizeRule1": {
+      "Type": "AWS::WAF::Rule",
+      "Properties": {
+        "Name": {
+          "Ref": "SizeRule1"
+        },
+        "MetricName": {
+          "Ref": "SizeRule1"
+        },
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFSizeCondition1"
+            },
+            "Negated": false,
+            "Type": "SizeConstraint"
+          },
+          {
+            "DataId": {
+              "Ref": "WhiteListIPCondition1"
+            },
+            "Negated": true,
+            "Type": "IPMatch"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WAFSizeCondition1ID": {
+      "Description": "Size Condition ID 1",
+      "Value": {
+        "Ref": "WAFSizeCondition1"
+      }
+    },
+    "WAFSizeRule1ID": {
+      "Description": "Size Rule ID 1",
+      "Value": {
+        "Ref": "WAFSizeRule1"
+      }
+    }
+  }
+}

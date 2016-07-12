@@ -1,0 +1,110 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS WAF Sample - SQL Injection Example Conditions and Rules 1",
+  "Parameters": {
+    "SQLiRule1": {
+      "Type": "String",
+      "Default": "SQLiRule1",
+      "Description": "Enter the name of the SQLi rule. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "SQLiCondition1": {
+      "Type": "String",
+      "Default": "SQLiCondition1",
+      "Description": "Enter the name of the SQLi condition. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "WhiteListIPCondition1": {
+      "Type": "String",
+      "Description": "Enter the ID of the WhiteList IP condition 1."
+    }
+  },
+  "Resources": {
+    "WAFSQLiCondition1": {
+      "Type": "AWS::WAF::SqlInjectionMatchSet",
+      "Properties": {
+        "Name": {
+          "Ref": "SQLiCondition1"
+        },
+        "SqlInjectionMatchTuples": [
+          {
+            "FieldToMatch": {
+              "Type": "QUERY_STRING"
+            },
+            "TextTransformation": "URL_DECODE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "QUERY_STRING"
+            },
+            "TextTransformation": "HTML_ENTITY_DECODE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "BODY"
+            },
+            "TextTransformation": "URL_DECODE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "BODY"
+            },
+            "TextTransformation": "HTML_ENTITY_DECODE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI"
+            },
+            "TextTransformation": "URL_DECODE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI"
+            },
+            "TextTransformation": "HTML_ENTITY_DECODE"
+          }
+        ]
+      }
+    },
+    "WAFSQLiRule1": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFSQLiCondition1",
+      "Properties": {
+        "Name": {
+          "Ref": "SQLiRule1"
+        },
+        "MetricName": {
+          "Ref": "SQLiRule1"
+        },
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFSQLiCondition1"
+            },
+            "Negated": false,
+            "Type": "SqlInjectionMatch"
+          },
+          {
+            "DataId": {
+              "Ref": "WhiteListIPCondition1"
+            },
+            "Negated": true,
+            "Type": "IPMatch"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WAFSQLiCondition1ID": {
+      "Description": "SQLi Condition ID 1",
+      "Value": {
+        "Ref": "WAFSQLiCondition1"
+      }
+    },
+    "WAFSQLiRule1ID": {
+      "Description": "SQLi Rule ID 1",
+      "Value": {
+        "Ref": "WAFSQLiRule1"
+      }
+    }
+  }
+}

@@ -1,0 +1,109 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS WAF Sample - Cross Site Scripting Example Match Sets and Rules 1",
+  "Parameters": {
+    "XssRule1": {
+      "Type": "String",
+      "Default": "XssRule1",
+      "Description": "Enter the name of the XSS rule. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "XssCondition1": {
+      "Type": "String",
+      "Default": "XssCondition1",
+      "Description": "Enter the name of the XSS condition. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "WhiteListIPCondition1": {
+      "Type": "String",
+      "Description": "Enter the ID of the WhiteList IP condition 1."
+    }
+  },
+  "Resources": {
+    "WAFXssCondition1": {
+      "Type": "AWS::WAF::XssMatchSet",
+      "Properties": {
+        "Name": {
+          "Ref": "XssCondition1"
+        },
+        "XssMatchTuples": [
+          {
+            "FieldToMatch": {
+              "Type": "QUERY_STRING"
+            },
+            "TextTransformation": "URL_DECODE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "QUERY_STRING"
+            },
+            "TextTransformation": "HTML_ENTITY_DECODE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "BODY"
+            },
+            "TextTransformation": "URL_DECODE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "BODY"
+            },
+            "TextTransformation": "HTML_ENTITY_DECODE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI"
+            },
+            "TextTransformation": "URL_DECODE"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI"
+            },
+            "TextTransformation": "HTML_ENTITY_DECODE"
+          }
+        ]
+      }
+    },
+    "WAFXssRule1": {
+      "Type": "AWS::WAF::Rule",
+      "Properties": {
+        "Name": {
+          "Ref": "XssRule1"
+        },
+        "MetricName": {
+          "Ref": "XssRule1"
+        },
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFXssCondition1"
+            },
+            "Negated": false,
+            "Type": "XssMatch"
+          },
+          {
+            "DataId": {
+              "Ref": "WhiteListIPCondition1"
+            },
+            "Negated": true,
+            "Type": "IPMatch"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WAFXssCondition1ID": {
+      "Description": "Xss Condition ID",
+      "Value": {
+        "Ref": "WAFXssCondition1"
+      }
+    },
+    "WAFXssRule1ID": {
+      "Description": "Xss 1 Block Match Rule ID",
+      "Value": {
+        "Ref": "WAFXssRule1"
+      }
+    }
+  }
+}

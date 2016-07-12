@@ -1,0 +1,357 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS WAF Sample - Master Nested Example Template **NOTICE** Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved. Licensed under the Amazon Software License (the 'License'). You may not use this file except in compliance with the License. A copy of the License is located at http://aws.amazon.com/asl/ or in the 'license' file accompanying this file. This file is distributed on an 'AS IS' BASIS, WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, express or implied. See the License for the specific language governing permissions and limitations under the License",
+  "Parameters": {
+    "WebACL1Name": {
+      "Type": "String",
+      "Default": "WebACL1",
+      "Description": "Enter the name of the WEB ACL. Names cannot be modified after creation and must be alphanumeric without spaces"
+    },
+    "WAFWebACL1Action": {
+      "Type": "String",
+      "Default": "COUNT",
+      "Description": "BLOCK or COUNT",
+      "AllowedValues": [
+        "COUNT",
+        "BLOCK"
+      ]
+    },
+    "WAFSizeURI1": {
+      "Type": "String",
+      "Default": "8192",
+      "Description": "Bytes",
+      "AllowedValues": [
+        "8192",
+        "7168",
+        "6144",
+        "5120",
+        "4096",
+        "3072",
+        "2048",
+        "1024"
+      ]
+    },
+    "WAFSizeQuery1": {
+      "Type": "String",
+      "Default": "8192",
+      "Description": "Bytes",
+      "AllowedValues": [
+        "8192",
+        "7168",
+        "6144",
+        "5120",
+        "4096",
+        "3072",
+        "2048",
+        "1024"
+      ]
+    },
+    "WAFWhiteListIP1": {
+      "Type": "String",
+      "Default": "1.1.1.1/32",
+      "Description": "Only /8, /16, /24, and /32 are accepted"
+    },
+    "WAFWEBACL1CFTURL": {
+      "Type": "String",
+      "Default": "https://s3.amazonaws.com/awswaf.us-east-1/waf-rules-example1/cfn_waf-webacl_1_v1.json",
+      "Description": "Enter the S3 template URL eg https://s3.amazonaws.com/bucketname/path/filename"
+    },
+    "WAFByteURI1CFTURL": {
+      "Type": "String",
+      "Default": "https://s3.amazonaws.com/awswaf.us-east-1/waf-rules-example1/cfn_waf-byteuri_1_v1.json",
+      "Description": "Enter the S3 template URL eg https://s3.amazonaws.com/bucketname/path/filename"
+    },
+    "WAFByteURI2CFTURL": {
+      "Type": "String",
+      "Default": "https://s3.amazonaws.com/awswaf.us-east-1/waf-rules-example1/cfn_waf-byteuri_2_v1.json",
+      "Description": "Enter the S3 template URL eg https://s3.amazonaws.com/bucketname/path/filename"
+    },
+    "WAFByteHeader1CFTURL": {
+      "Type": "String",
+      "Default": "https://s3.amazonaws.com/awswaf.us-east-1/waf-rules-example1/cfn_waf-byteheader_1_v1.json",
+      "Description": "Enter the S3 template URL eg https://s3.amazonaws.com/bucketname/path/filename"
+    },
+    "WAFByteHeader2CFTURL": {
+      "Type": "String",
+      "Default": "https://s3.amazonaws.com/awswaf.us-east-1/waf-rules-example1/cfn_waf-byteheader_2_v1.json",
+      "Description": "Enter the S3 template URL eg https://s3.amazonaws.com/bucketname/path/filename"
+    },
+    "WAFIP1CFTURL": {
+      "Type": "String",
+      "Default": "https://s3.amazonaws.com/awswaf.us-east-1/waf-rules-example1/cfn_waf-ip_1_v1.json",
+      "Description": "Enter the S3 template URL eg https://s3.amazonaws.com/bucketname/path/filename"
+    },
+    "WAFSQLi1CFTURL": {
+      "Type": "String",
+      "Default": "https://s3.amazonaws.com/awswaf.us-east-1/waf-rules-example1/cfn_waf-sqli_1_v1.json",
+      "Description": "Enter the S3 template URL eg https://s3.amazonaws.com/bucketname/path/filename"
+    },
+    "WAFXss1CFTURL": {
+      "Type": "String",
+      "Default": "https://s3.amazonaws.com/awswaf.us-east-1/waf-rules-example1/cfn_waf-xss_1_v1.json",
+      "Description": "Enter the S3 template URL eg https://s3.amazonaws.com/bucketname/path/filename"
+    },
+    "WAFSize1CFTURL": {
+      "Type": "String",
+      "Default": "https://s3.amazonaws.com/awswaf.us-east-1/waf-rules-example1/cfn_waf-size_1_v1.json",
+      "Description": "Enter the S3 template URL eg https://s3.amazonaws.com/bucketname/path/filename"
+    }
+  },
+  "Metadata": {
+    "AWS::CloudFormation::Interface": {
+      "ParameterGroups": [
+        {
+          "Label": {
+            "default": "WAF Configuration"
+          },
+          "Parameters": [
+            "WebACL1Name",
+            "WAFWebACL1Action",
+            "WAFWhiteListIP1",
+            "WAFSizeURI1",
+            "WAFSizeQuery1"
+          ]
+        },
+        {
+          "Label": {
+            "default": "Nested Template URL's"
+          },
+          "Parameters": [
+            "WAFWEBACL1CFTURL",
+            "WAFByteURI1CFTURL",
+            "WAFByteURI2CFTURL",
+            "WAFByteHeader1CFTURL",
+            "WAFByteHeader2CFTURL",
+            "WAFIP1CFTURL",
+            "WAFSQLi1CFTURL",
+            "WAFXss1CFTURL",
+            "WAFSize1CFTURL"
+          ]
+        }
+      ],
+      "ParameterLabels": {
+        "WebACL1Name": {
+          "default": "WAF Web ACL Name"
+        },
+        "WAFWebACL1Action": {
+          "default": "Action For All Rules:"
+        },
+        "WAFWhiteListIP1": {
+          "default": "White List CIDR:"
+        },
+        "WAFSizeURI1": {
+          "default": "Max Size of URI"
+        },
+        "WAFSizeQuery1": {
+          "default": "Max Size of Query String"
+        }
+      }
+    }
+  },
+  "Resources": {
+    "WAFWEBACL1": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "WAFIP1",
+      "Properties": {
+        "TemplateURL": {
+          "Ref": "WAFWEBACL1CFTURL"
+        },
+        "TimeoutInMinutes": "15",
+        "Parameters": {
+          "WebACL1": {
+            "Ref": "WebACL1Name"
+          },
+          "WebACL1Action": {
+            "Ref": "WAFWebACL1Action"
+          },
+          "ByteURIRule2": {
+            "Fn::GetAtt": [
+              "WAFByteURI2",
+              "Outputs.WAFByteURIRule2ID"
+            ]
+          },
+          "ByteHeaderRule2": {
+            "Fn::GetAtt": [
+              "WAFByteHeader2",
+              "Outputs.WAFByteHeaderRule2ID"
+            ]
+          },
+          "ManualIPRule1": {
+            "Fn::GetAtt": [
+              "WAFIP1",
+              "Outputs.WAFManualIPRule1ID"
+            ]
+          },
+          "AutoIPRule1": {
+            "Fn::GetAtt": [
+              "WAFIP1",
+              "Outputs.WAFAutoIPRule1ID"
+            ]
+          },
+          "SQLiRule1": {
+            "Fn::GetAtt": [
+              "WAFSQLi1",
+              "Outputs.WAFSQLiRule1ID"
+            ]
+          },
+          "XssRule1": {
+            "Fn::GetAtt": [
+              "WAFXss1",
+              "Outputs.WAFXssRule1ID"
+            ]
+          },
+          "SizeRule1": {
+            "Fn::GetAtt": [
+              "WAFSize1",
+              "Outputs.WAFSizeRule1ID"
+            ]
+          },
+          "ByteHeaderRule1": {
+            "Fn::GetAtt": [
+              "WAFByteHeader1",
+              "Outputs.WAFByteHeaderRule1ID"
+            ]
+          },
+          "ByteURIRule1": {
+            "Fn::GetAtt": [
+              "WAFByteURI1",
+              "Outputs.WAFByteURIRule1ID"
+            ]
+          }
+        }
+      }
+    },
+    "WAFByteURI2": {
+      "Type": "AWS::CloudFormation::Stack",
+      "DependsOn": "WAFIP1",
+      "Properties": {
+        "TemplateURL": {
+          "Ref": "WAFByteURI2CFTURL"
+        },
+        "Parameters": {
+          "WhiteListIPCondition1": {
+            "Fn::GetAtt": [
+              "WAFIP1",
+              "Outputs.WAFWhiteListIPCondition1ID"
+            ]
+          }
+        }
+      }
+    },
+    "WAFByteHeader2": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Ref": "WAFByteHeader2CFTURL"
+        },
+        "Parameters": {
+          "WhiteListIPCondition1": {
+            "Fn::GetAtt": [
+              "WAFIP1",
+              "Outputs.WAFWhiteListIPCondition1ID"
+            ]
+          }
+        }
+      }
+    },
+    "WAFIP1": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Ref": "WAFIP1CFTURL"
+        },
+        "Parameters": {
+          "WhiteListIP1": {
+            "Ref": "WAFWhiteListIP1"
+          }
+        }
+      }
+    },
+    "WAFSQLi1": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Ref": "WAFSQLi1CFTURL"
+        },
+        "Parameters": {
+          "WhiteListIPCondition1": {
+            "Fn::GetAtt": [
+              "WAFIP1",
+              "Outputs.WAFWhiteListIPCondition1ID"
+            ]
+          }
+        }
+      }
+    },
+    "WAFXss1": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Ref": "WAFXss1CFTURL"
+        },
+        "Parameters": {
+          "WhiteListIPCondition1": {
+            "Fn::GetAtt": [
+              "WAFIP1",
+              "Outputs.WAFWhiteListIPCondition1ID"
+            ]
+          }
+        }
+      }
+    },
+    "WAFSize1": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Ref": "WAFSize1CFTURL"
+        },
+        "Parameters": {
+          "SizeURI1": {
+            "Ref": "WAFSizeURI1"
+          },
+          "SizeQuery1": {
+            "Ref": "WAFSizeQuery1"
+          },
+          "WhiteListIPCondition1": {
+            "Fn::GetAtt": [
+              "WAFIP1",
+              "Outputs.WAFWhiteListIPCondition1ID"
+            ]
+          }
+        }
+      }
+    },
+    "WAFByteHeader1": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Ref": "WAFByteHeader1CFTURL"
+        },
+        "Parameters": {
+          "WhiteListIPCondition1": {
+            "Fn::GetAtt": [
+              "WAFIP1",
+              "Outputs.WAFWhiteListIPCondition1ID"
+            ]
+          }
+        }
+      }
+    },
+    "WAFByteURI1": {
+      "Type": "AWS::CloudFormation::Stack",
+      "Properties": {
+        "TemplateURL": {
+          "Ref": "WAFByteURI1CFTURL"
+        },
+        "Parameters": {
+          "WhiteListIPCondition1": {
+            "Fn::GetAtt": [
+              "WAFIP1",
+              "Outputs.WAFWhiteListIPCondition1ID"
+            ]
+          }
+        }
+      }
+    }
+  }
+}

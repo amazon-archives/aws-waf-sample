@@ -1,0 +1,146 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS WAF Sample - Byte Header Example Conditions and Rules 1",
+  "Parameters": {
+    "ByteHeaderRule1": {
+      "Type": "String",
+      "Default": "ByteHeaderRule1",
+      "Description": "Enter the name of the byte header rule 1. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "ByteHeaderCondition1": {
+      "Type": "String",
+      "Default": "ByteHeaderCondition1",
+      "Description": "Enter the name of the byte header condition 1. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "WhiteListIPCondition1": {
+      "Type": "String",
+      "Description": "Enter the ID of the WhiteList IP condition 1."
+    }
+  },
+  "Resources": {
+    "WAFByteHeaderCondition1": {
+      "Type": "AWS::WAF::ByteMatchSet",
+      "Properties": {
+        "Name": {
+          "Ref": "ByteHeaderCondition1"
+        },
+        "ByteMatchTuples": [
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "sogou",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "voltron",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "wpspider",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "etaospider",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "baidu",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "yandex",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "adnormcrawler",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "wordpress",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          }
+        ]
+      }
+    },
+    "WAFByteHeaderRule1": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFByteHeaderCondition1",
+      "Properties": {
+        "Name": {
+          "Ref": "ByteHeaderRule1"
+        },
+        "MetricName": {
+          "Ref": "ByteHeaderRule1"
+        },
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFByteHeaderCondition1"
+            },
+            "Negated": false,
+            "Type": "ByteMatch"
+          },
+          {
+            "DataId": {
+              "Ref": "WhiteListIPCondition1"
+            },
+            "Negated": true,
+            "Type": "IPMatch"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WAFByteHeaderCondition1ID": {
+      "Description": "Byte Header Condition ID 1",
+      "Value": {
+        "Ref": "WAFByteHeaderCondition1"
+      }
+    },
+    "WAFByteHeaderRule1ID": {
+      "Description": "Byte Header Rule ID 1",
+      "Value": {
+        "Ref": "WAFByteHeaderRule1"
+      }
+    }
+  }
+}

@@ -1,0 +1,137 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS WAF Sample - Byte Header Example Conditions and Rules 2",
+  "Parameters": {
+    "ByteHeaderRule2": {
+      "Type": "String",
+      "Default": "ByteHeaderRule2",
+      "Description": "Enter the name of the byte header rule 2. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "ByteHeaderCondition2": {
+      "Type": "String",
+      "Default": "ByteHeaderCondition2",
+      "Description": "Enter the name of the byte header condition 2. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "WhiteListIPCondition1": {
+      "Type": "String",
+      "Description": "Enter the ID of the WhiteList IP condition 1."
+    }
+  },
+  "Resources": {
+    "WAFByteHeaderCondition2": {
+      "Type": "AWS::WAF::ByteMatchSet",
+      "Properties": {
+        "Name": {
+          "Ref": "ByteHeaderCondition2"
+        },
+        "ByteMatchTuples": [
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "curl",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "urllib",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "python",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "wget",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "ruby",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "java",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "HEADER",
+              "Data": "User-Agent"
+            },
+            "TargetString": "libwww",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          }
+        ]
+      }
+    },
+    "WAFByteHeaderRule2": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFByteHeaderCondition2",
+      "Properties": {
+        "Name": {
+          "Ref": "ByteHeaderRule2"
+        },
+        "MetricName": {
+          "Ref": "ByteHeaderRule2"
+        },
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFByteHeaderCondition2"
+            },
+            "Negated": false,
+            "Type": "ByteMatch"
+          },
+          {
+            "DataId": {
+              "Ref": "WhiteListIPCondition1"
+            },
+            "Negated": true,
+            "Type": "IPMatch"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WAFByteHeaderCondition2ID": {
+      "Description": "Byte Header Condition ID 2",
+      "Value": {
+        "Ref": "WAFByteHeaderCondition2"
+      }
+    },
+    "WAFByteHeaderRule2ID": {
+      "Description": "Byte Header Rule ID 2",
+      "Value": {
+        "Ref": "WAFByteHeaderRule2"
+      }
+    }
+  }
+}

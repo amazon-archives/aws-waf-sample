@@ -1,0 +1,178 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS WAF Sample - WEB ACL Example - Associate with Rules",
+  "Parameters": {
+    "WebACL1": {
+      "Type": "String",
+      "Description": "Enter the name of the WEB ACL. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "WebACL1Action": {
+      "Type": "String",
+      "Description": "Select COUNT to test rules and monitor requests and BLOCK to block requests"
+    },
+    "ManualIPRule1": {
+      "Type": "String",
+      "Description": "Enter the ID of the ManualIPRule1."
+    },
+    "AutoIPRule1": {
+      "Type": "String",
+      "Description": "Enter the ID of the AutoIPRule1."
+    },
+    "ByteHeaderRule1": {
+      "Type": "String",
+      "Description": "Enter the ID of the ByteHeaderRule1."
+    },
+    "ByteHeaderRule2": {
+      "Type": "String",
+      "Description": "Enter the ID of the ByteHeaderRule2."
+    },
+    "ByteURIRule1": {
+      "Type": "String",
+      "Description": "Enter the ID of the ByteURIRule1."
+    },
+    "ByteURIRule2": {
+      "Type": "String",
+      "Description": "Enter the ID of the ByteURIRule2."
+    },
+    "SQLiRule1": {
+      "Type": "String",
+      "Description": "Enter the ID of the SQLiRule1."
+    },
+    "XssRule1": {
+      "Type": "String",
+      "Description": "Enter the ID of the XssRule1."
+    },
+    "SizeRule1": {
+      "Type": "String",
+      "Description": "Enter the ID of the SizeRule1."
+    }
+  },
+  "Resources": {
+    "WAFWebACL1": {
+      "Type": "AWS::WAF::WebACL",
+      "Properties": {
+        "Name": {
+          "Ref": "WebACL1"
+        },
+        "DefaultAction": {
+          "Type": "ALLOW"
+        },
+        "MetricName": "DefaultAction",
+        "Rules": [
+          {
+            "Action": {
+              "Type": {
+                "Ref": "WebACL1Action"
+              }
+            },
+            "Priority": 1,
+            "RuleId": {
+              "Ref": "ManualIPRule1"
+            }
+          },
+          {
+            "Action": {
+              "Type": {
+                "Ref": "WebACL1Action"
+              }
+            },
+            "Priority": 2,
+            "RuleId": {
+              "Ref": "AutoIPRule1"
+            }
+          },
+          {
+            "Action": {
+              "Type": {
+                "Ref": "WebACL1Action"
+              }
+            },
+            "Priority": 3,
+            "RuleId": {
+              "Ref": "ByteHeaderRule1"
+            }
+          },
+          {
+            "Action": {
+              "Type": {
+                "Ref": "WebACL1Action"
+              }
+            },
+            "Priority": 4,
+            "RuleId": {
+              "Ref": "ByteHeaderRule2"
+            }
+          },
+          {
+            "Action": {
+              "Type": {
+                "Ref": "WebACL1Action"
+              }
+            },
+            "Priority": 5,
+            "RuleId": {
+              "Ref": "ByteURIRule1"
+            }
+          },
+          {
+            "Action": {
+              "Type": {
+                "Ref": "WebACL1Action"
+              }
+            },
+            "Priority": 6,
+            "RuleId": {
+              "Ref": "ByteURIRule2"
+            }
+          },
+          {
+            "Action": {
+              "Type": {
+                "Ref": "WebACL1Action"
+              }
+            },
+            "Priority": 7,
+            "RuleId": {
+              "Ref": "SQLiRule1"
+            }
+          },
+          {
+            "Action": {
+              "Type": {
+                "Ref": "WebACL1Action"
+              }
+            },
+            "Priority": 8,
+            "RuleId": {
+              "Ref": "XssRule1"
+            }
+          },
+          {
+            "Action": {
+              "Type": {
+                "Ref": "WebACL1Action"
+              }
+            },
+            "Priority": 9,
+            "RuleId": {
+              "Ref": "SizeRule1"
+            }
+          }
+        ]
+      },
+      "CreationPolicy": {
+        "ResourceSignal": {
+          "Timeout": "PT15M"
+        }
+      }
+    }
+  },
+  "Outputs": {
+    "WAFWebACL1ID": {
+      "Description": "WEBACL1 ID",
+      "Value": {
+        "Ref": "WAFWebACL1"
+      }
+    }
+  }
+}

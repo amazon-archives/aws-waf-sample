@@ -1,0 +1,144 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS WAF Sample - Manual and Auto IP Example Conditions and Rules, Note separate AWS Lambda function required for automatic blocking",
+  "Parameters": {
+    "ManualIPRule1": {
+      "Type": "String",
+      "Default": "ManualIPRule1",
+      "Description": "Enter the name of the manual IP rule 1. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "AutoIPRule1": {
+      "Type": "String",
+      "Default": "AutoIPRule1",
+      "Description": "Enter the name of the auto IP rule 1. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "AutoIPCondition1": {
+      "Type": "String",
+      "Default": "AutoIPCondition1",
+      "Description": "Enter the name of the auto IP condition 1. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "ManualIPCondition1": {
+      "Type": "String",
+      "Default": "ManualIPCondition1",
+      "Description": "Enter the name of the manual IP condition 1. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "WhiteListIPCondition1": {
+      "Type": "String",
+      "Default": "WhiteListIPCondition1",
+      "Description": "Enter the name of the white list IP condition 1. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "WhiteListIP1": {
+      "Type": "String",
+      "Default": "",
+      "Description": "Enter the white list IP or range in CIDR notation"
+    }
+  },
+  "Resources": {
+    "WAFManualIPCondition1": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": {
+          "Ref": "ManualIPCondition1"
+        }
+      }
+    },
+    "WAFAutoIPCondition1": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": {
+          "Ref": "AutoIPCondition1"
+        }
+      }
+    },
+    "WAFWhiteListIPCondition1": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": {
+          "Ref": "WhiteListIPCondition1"
+        },
+        "IPSetDescriptors": [
+          {
+            "Type": "IPV4",
+            "Value": {
+              "Ref": "WhiteListIP1"
+            }
+          }
+        ]
+      }
+    },
+    "WAFManualIPRule1": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFManualIPCondition1",
+      "Properties": {
+        "Name": {
+          "Ref": "ManualIPRule1"
+        },
+        "MetricName": {
+          "Ref": "ManualIPRule1"
+        },
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFManualIPCondition1"
+            },
+            "Negated": false,
+            "Type": "IPMatch"
+          }
+        ]
+      }
+    },
+    "WAFAutoIPRule1": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFAutoIPCondition1",
+      "Properties": {
+        "Name": {
+          "Ref": "AutoIPRule1"
+        },
+        "MetricName": {
+          "Ref": "AutoIPRule1"
+        },
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFAutoIPCondition1"
+            },
+            "Negated": false,
+            "Type": "IPMatch"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WAFManualIPCondition1ID": {
+      "Description": "Manual IP Condition ID 1",
+      "Value": {
+        "Ref": "WAFManualIPCondition1"
+      }
+    },
+    "WAFAutoIPCondition1ID": {
+      "Description": "Auto IP Condition ID 1",
+      "Value": {
+        "Ref": "WAFAutoIPCondition1"
+      }
+    },
+    "WAFWhiteListIPCondition1ID": {
+      "Description": "Allowed IP Condition ID 1",
+      "Value": {
+        "Ref": "WAFWhiteListIPCondition1"
+      }
+    },
+    "WAFManualIPRule1ID": {
+      "Description": "Manual IP Rule ID 1",
+      "Value": {
+        "Ref": "WAFManualIPRule1"
+      }
+    },
+    "WAFAutoIPRule1ID": {
+      "Description": "Auto IP Rule ID 1",
+      "Value": {
+        "Ref": "WAFAutoIPRule1"
+      }
+    }
+  }
+}

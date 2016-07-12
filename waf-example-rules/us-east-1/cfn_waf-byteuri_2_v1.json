@@ -1,0 +1,146 @@
+{
+  "AWSTemplateFormatVersion": "2010-09-09",
+  "Description": "AWS WAF Sample - Byte URI Example Conditions and Rules 2",
+  "Parameters": {
+    "ByteURIRule2": {
+      "Type": "String",
+      "Default": "ByteURIRule2",
+      "Description": "Enter the name of the byte URI rule 2. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "ByteURICondition2": {
+      "Type": "String",
+      "Default": "ByteURICondition2",
+      "Description": "Enter the name of the byte URI condition 2. Note names cannot be modified after creation and must be alphanumeric without spaces."
+    },
+    "WhiteListIPCondition1": {
+      "Type": "String",
+      "Description": "Enter the ID of the WhiteList IP condition 1."
+    }
+  },
+  "Resources": {
+    "WAFByteURICondition2": {
+      "Type": "AWS::WAF::ByteMatchSet",
+      "Properties": {
+        "Name": {
+          "Ref": "ByteURICondition2"
+        },
+        "ByteMatchTuples": [
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "$user_id",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "$userid",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "$user_name",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "$username",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "$password",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "$session",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "databasedrivermysql",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          },
+          {
+            "FieldToMatch": {
+              "Type": "URI",
+              "Data": ""
+            },
+            "TargetString": "SimplepieFactory",
+            "TextTransformation": "CMD_LINE",
+            "PositionalConstraint": "CONTAINS"
+          }
+        ]
+      }
+    },
+    "WAFByteURIRule2": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFByteURICondition2",
+      "Properties": {
+        "Name": {
+          "Ref": "ByteURIRule2"
+        },
+        "MetricName": {
+          "Ref": "ByteURIRule2"
+        },
+        "Predicates": [
+          {
+            "DataId": {
+              "Ref": "WAFByteURICondition2"
+            },
+            "Negated": false,
+            "Type": "ByteMatch"
+          },
+          {
+            "DataId": {
+              "Ref": "WhiteListIPCondition1"
+            },
+            "Negated": true,
+            "Type": "IPMatch"
+          }
+        ]
+      }
+    }
+  },
+  "Outputs": {
+    "WAFByteURICondition2ID": {
+      "Description": "UserAgents Condition ID 1",
+      "Value": {
+        "Ref": "WAFByteURICondition2"
+      }
+    },
+    "WAFByteURIRule2ID": {
+      "Description": "UserAgents Rule ID 1",
+      "Value": {
+        "Ref": "WAFByteURIRule2"
+      }
+    }
+  }
+}
