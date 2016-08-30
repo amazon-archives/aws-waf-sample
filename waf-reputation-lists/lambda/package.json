@@ -1,6 +1,6 @@
 {
   "name": "aws-waf-reputation-lists-lambda",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Lambda function for processing IP reputation lists for AWS WAF",
   "main": "index.js",
   "scripts": {
