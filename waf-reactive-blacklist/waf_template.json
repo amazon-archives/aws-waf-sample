@@ -49,7 +49,7 @@
     "RequestThreshold": {
       "Type": "Number",
       "Default": "400",
-      "Description": "Enter the maximum acceptable request per second per IP address. Default: 400 requests per minute"
+      "Description": "Enter the maximum acceptable request per minute per IP address. Default: 400 requests per minute"
     },
     "WAFBlockPeriod": {
       "Type": "Number",
