@@ -191,7 +191,7 @@
                     },
                     "S3Key": "waf-tor-blocking/lambda.zip"
                 },
-                "Runtime": "nodejs",
+                "Runtime": "nodejs4.3",
                 "MemorySize": "512",
                 "Timeout": "60"
             }
