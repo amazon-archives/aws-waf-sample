@@ -197,7 +197,7 @@
                     },
                     "S3Key": "waf-reputation-lists/lambda.zip"
                 },
-                "Runtime": "nodejs",
+                "Runtime": "nodejs4.3",
                 "MemorySize": "512",
                 "Timeout": "60"
             }
