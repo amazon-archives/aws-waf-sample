@@ -15,7 +15,7 @@ Full blog post: http://blogs.aws.amazon.com/security/post/Tx223ZW25YRPRKV/How-to
 
 ## waf-reputation-lists
 An AWS CloudFormation template that creates an AWS WAF Web ACL, Rules, and IP Sets, an AWS Lambda function and CloudWatch Scheduled Event. The Lambda function imports multiple IP reputation lists and updates AWS WAF IP Sets in order to deny access from the IP ranges defined in those lists.
-Amazon CloudWatch Scheduled Events is utilised to execute the function regularly in order to automate the update of the IP Sets as the lists are updated. 
+Amazon CloudWatch Scheduled Events is utilised to execute the function regularly in order to automate the update of the IP Sets as the lists are updated. Full blog post: https://aws.amazon.com/blogs/security/how-to-import-ip-address-reputation-lists-to-automatically-update-aws-waf-ip-blacklists/
 
 
 ***
