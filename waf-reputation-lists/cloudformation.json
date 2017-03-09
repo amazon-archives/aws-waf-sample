@@ -21,6 +21,84 @@
                 "Name": "IP Set #2"
             }
         },
+		"WAFIPSet3": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #3"
+            }
+        },
+        "WAFIPSet4": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #4"
+            }
+        },
+"WAFIPSet5": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #5"
+            }
+        },
+        "WAFIPSet6": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #6"
+            }
+        },
+"WAFIPSet7": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #7"
+            }
+        },
+        "WAFIPSet8": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #8"
+            }
+        },
+        "WAFIPSet9": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #9"
+            }
+        },
+        "WAFIPSet10": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #10"
+            }
+        },
+        "WAFIPSet11": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #11"
+            }
+        },
+        "WAFIPSet12": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #12"
+            }
+        },
+		"WAFIPSet13": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #13"
+            }
+        },
+        "WAFIPSet14": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #14"
+            }
+        },
+		"WAFIPSet15": {
+            "Type": "AWS::WAF::IPSet",
+            "Properties": {
+                "Name": "IP Set #15"
+            }
+        },
         "WAFRule1": {
             "Type": "AWS::WAF::Rule",
             "Properties": {
@@ -32,7 +110,35 @@
                             "Ref": "WAFIPSet1"
                         },
                         "Type": "IPMatch",
-                        "Negated": "false"
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet2"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet3"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet4"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet5"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
                     }
                 ]
             }
@@ -45,10 +151,82 @@
                 "Predicates": [
                     {
                         "DataId": {
-                            "Ref": "WAFIPSet2"
+                            "Ref": "WAFIPSet6"
                         },
                         "Type": "IPMatch",
-                        "Negated": "false"
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet7"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet8"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet9"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet10"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    }
+                ]
+            }
+        },
+        "WAFRule3": {
+            "Type": "AWS::WAF::Rule",
+            "Properties": {
+                "Name": "WAF Rule #3",
+                "MetricName": "WAFRule3",
+                "Predicates": [
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet11"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet12"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet13"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet14"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
+                    },
+                    {
+                        "DataId": {
+                            "Ref": "WAFIPSet15"
+                        },
+                        "Type": "IPMatch",
+                        "Negated": "true"
                     }
                 ]
             }
@@ -58,13 +236,13 @@
             "Properties": {
                 "Name": "WebACL",
                 "DefaultAction": {
-                    "Type": "ALLOW"
+                    "Type": "BLOCK"
                 },
                 "MetricName": "MaliciousRequesters",
                 "Rules": [
                     {
                         "Action": {
-                            "Type": "BLOCK"
+                            "Type": "ALLOW"
                         },
                         "Priority": 1,
                         "RuleId": {
@@ -73,11 +251,20 @@
                     },
                     {
                         "Action": {
-                            "Type": "BLOCK"
+                            "Type": "ALLOW"
                         },
                         "Priority": 2,
                         "RuleId": {
                             "Ref": "WAFRule2"
+                        }
+                    },
+                    {
+                        "Action": {
+                            "Type": "ALLOW"
+                        },
+                        "Priority": 3,
+                        "RuleId": {
+                            "Ref": "WAFRule3"
                         }
                     }
                 ]
@@ -164,6 +351,201 @@
                                                     }
                                                 ]
                                             ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet3"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet4"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet5"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet6"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet7"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet8"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet9"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet10"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet11"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet12"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet13"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet14"
+                                                    }
+                                                ]
+                                            ]
+                                        },
+                                        {
+                                            "Fn::Join": [
+                                                "",
+                                                [
+                                                    "arn:aws:waf::",
+                                                    {
+                                                        "Ref": "AWS::AccountId"
+                                                    },
+                                                    ":ipset/",
+                                                    {
+                                                        "Ref": "WAFIPSet15"
+                                                    }
+                                                ]
+                                            ]
                                         }
                                     ]
                                 }
@@ -234,6 +616,71 @@
                                     "\"",
                                     {
                                         "Ref": "WAFIPSet2"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet3"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet4"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet5"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet6"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet7"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet8"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet9"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet10"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet11"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet12"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet13"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet14"
+                                    },
+                                    "\",",
+                                    "\"",
+                                    {
+                                        "Ref": "WAFIPSet15"
                                     },
                                     "\"",
                                     "]}"
