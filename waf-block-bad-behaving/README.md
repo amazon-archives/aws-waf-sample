@@ -1,4 +1,6 @@
 # waf-block-bad-behaving
+> **NOTE**: This solution has been integrated into the [AWS WAF Security Automations](https://aws.amazon.com/answers/security/aws-waf-security-automations/), and is now maintained in that repository: [https://github.com/awslabs/aws-waf-security-automations](https://github.com/awslabs/aws-waf-security-automations).
+> Please refer suggestions for improvement to that repository.
 
 A solution that automatically parses CloudFront access logs as they are delivered to Amazon S3 by using Lambda, counts the number of bad requests from unique sources (IP addresses), and updates AWS WAF to block further requests from those IP addresses. A CloudFormation template is included that creates the web access control list (ACL), rule sets, Lambda function, and logging S3 bucket.
 Full blog post: http://blogs.aws.amazon.com/security/post/Tx223ZW25YRPRKV/How-to-Use-AWS-WAF-to-Block-IP-Addresses-That-Generate-Bad-Requests
