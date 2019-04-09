@@ -36,5 +36,5 @@ Amazon CloudWatch Scheduled Events is utilised to execute the function regularly
 
 ***
 
-Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 SPDX-License-Identifier: MIT-0
