@@ -6,5 +6,5 @@ A solution for detecting bad bots and content scrapers and blocking their access
 
 ***
 
-Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 SPDX-License-Identifier: MIT-0
