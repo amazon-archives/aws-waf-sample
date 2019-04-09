@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved. SPDX-License-Identifier: MIT-0",
+  "Description": "This AWS CloudFormation template assists in the provisioning of the AWS WAF bad behaving ip auto blocking stack without having to manually create all the components of this example. **WARNING** This template creates a Lambda Function, a AWS WAF Web ACL, a S3 Bucket and a CloudWatch Custom Metric. You will be billed for the AWS resources used if you create a stack from this template. **NOTICE** Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved. SPDX-License-Identifier: MIT-0",
   "Metadata": {
     "AWS::CloudFormation::Interface": {
       "ParameterGroups": [
