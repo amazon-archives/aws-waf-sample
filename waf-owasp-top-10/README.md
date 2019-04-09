@@ -3,5 +3,5 @@ This example AWS CloudFormation template contains an AWS WAF web access control 
 
 ***
 
-Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 SPDX-License-Identifier: MIT-0
