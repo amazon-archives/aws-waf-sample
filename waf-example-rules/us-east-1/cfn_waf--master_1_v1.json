@@ -1,6 +1,6 @@
 {
   "AWSTemplateFormatVersion": "2010-09-09",
-  "Description": "AWS WAF Sample - Master Nested Example Template **NOTICE** Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved. SPDX-License-Identifier: MIT-0",
+  "Description": "AWS WAF Sample - Master Nested Example Template **NOTICE** Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved. SPDX-License-Identifier: MIT-0",
   "Parameters": {
     "WebACL1Name": {
       "Type": "String",
