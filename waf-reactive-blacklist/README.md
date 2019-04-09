@@ -6,5 +6,5 @@ A solution that automatically detects unwanted requests based on request rate, a
 
 ***
 
-Copyright 2019 Amazon.com, Inc. or its affiliates. All Rights Reserved.
+Copyright 2016 Amazon.com, Inc. or its affiliates. All Rights Reserved.
 SPDX-License-Identifier: MIT-0
