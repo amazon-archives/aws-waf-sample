@@ -167,7 +167,7 @@
 				"Handler": "function.handler",
 				"MemorySize": 128,
 				"Role": { "Fn::GetAtt": [ "rLambdaRole", "Arn" ] },
-				"Runtime": "nodejs",
+				"Runtime": "nodejs4.3",
 				"Timeout": 10
 			}
 		},
