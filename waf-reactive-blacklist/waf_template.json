@@ -74,6 +74,12 @@
         "Name": "Manual Block Set"
       }
     },
+    "WAFManualWhitelistSet": {
+      "Type": "AWS::WAF::IPSet",
+      "Properties": {
+        "Name": "Manual Whitelist Set"
+      }
+    },
     "WAFAutoBlockSet": {
       "Type": "AWS::WAF::IPSet",
       "Properties": {
@@ -96,6 +102,21 @@
           "DataId": {
             "Ref": "WAFManualBlockSet"
           },
+          "Negated": false,
+          "Type": "IPMatch"
+        }]
+      }
+    },
+    "WAFManualWhitelistRule": {
+      "Type": "AWS::WAF::Rule",
+      "DependsOn": "WAFManualWhitelistSet",
+      "Properties": {
+        "Name": "Manual Whitelist Rule",
+        "MetricName": "ManualWhitelistRule",
+        "Predicates": [{
+          "DataId": {
+            "Ref": "WAFManualWhitelistSet"
+           },
           "Negated": false,
           "Type": "IPMatch"
         }]
@@ -133,7 +154,7 @@
     },
     "WAFWebACL": {
       "Type": "AWS::WAF::WebACL",
-      "DependsOn": ["WAFManualBlockRule", "WAFAutoBlockRule", "WAFAutoCountRule"],
+      "DependsOn": ["WAFManualBlockRule", "WAFManualWhitelistRule", "WAFAutoBlockRule", "WAFAutoCountRule"],
       "Properties": {
         "Name": "Malicious Requesters",
         "DefaultAction": {
@@ -150,9 +171,17 @@
           }
         }, {
           "Action": {
-            "Type": "BLOCK"
+            "Type": "ALLOW"
           },
           "Priority": 2,
+          "RuleId": {
+            "Ref": "WAFManualWhitelistRule"
+          }
+        }, {
+          "Action": {
+            "Type": "BLOCK"
+          },
+          "Priority": 3,
           "RuleId": {
             "Ref": "WAFAutoBlockRule"
           }
@@ -160,7 +189,7 @@
           "Action": {
             "Type": "COUNT"
           },
-          "Priority": 3,
+          "Priority": 4,
           "RuleId": {
             "Ref": "WAFAutoCountRule"
           }
@@ -344,6 +373,12 @@
       "Description": "Manual Block IP Set ID",
       "Value": {
         "Ref": "WAFManualBlockSet"
+      }
+    },
+    "ManualWhitelistIpSetId": {
+      "Description": "Manual Whitelist IP Set ID",
+      "Value": {
+        "Ref": "WAFManualWhitelistSet"
       }
     },
     "AutoBlockIPSetID": {
