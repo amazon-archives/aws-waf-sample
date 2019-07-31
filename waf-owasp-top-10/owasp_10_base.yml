@@ -1024,9 +1024,9 @@ Resources:
         - Type: IPV4
           Value: 169.254.0.0/16
         - Type: IPV4
-          Value: 172.16.0.0/16
+          Value: 172.16.0.0/12
         - Type: IPV4
-          Value: 127.0.0.1/32
+          Value: 127.0.0.0/8
   wafgBlacklistIpSet:
     Type: AWS::WAF::IPSet
     Condition: isGlobal
@@ -1040,9 +1040,9 @@ Resources:
         - Type: IPV4
           Value: 169.254.0.0/16
         - Type: IPV4
-          Value: 172.16.0.0/16
+          Value: 172.16.0.0/12
         - Type: IPV4
-          Value: 127.0.0.1/32
+          Value: 127.0.0.0/8
   wafrBlacklistIpRule:
     Type: AWS::WAFRegional::Rule
     Condition: isRegional
