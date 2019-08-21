@@ -20,14 +20,14 @@ aws.config.update({
 var waf = new aws.WAF();
 
 /**
- * Maximum number of IP descriptors per IP Set
+ * Default maximum number of IP descriptors per IP Set
  */
-var maxDescriptorsPerIpSet = 1000;
+var MAX_DESCRIPTORS_PER_IP_SET = 1000;
 
 /**
- * Maximum number of IP descriptors updates per call
+ * Default maximum number of IP descriptors updates per call
  */
-var maxDescriptorsPerIpSetUpdate = 1000;
+var MAX_DESCRIPTORS_PER_IP_SET_UPDATE = 1000;
 
 /**
  * Convert a dotted-decimal formated address to an integer
@@ -260,6 +260,10 @@ exports.handler = function (event, context) {
     if (!event || !event.lists || (event.lists.length === 0) || !event.ipSetIds || (event.ipSetIds.length === 0)) {
         done(context, null, 'Nothing to do');
     } else {
+        // allow the maximum number of descriptors to be configured as an argument
+        var maxDescriptorsPerIpSet = event.maxDescriptorsPerIpSet || MAX_DESCRIPTORS_PER_IP_SET;
+        var maxDescriptorsPerIpSetUpdate = event.maxDescriptorsPerIpSetUpdate || MAX_DESCRIPTORS_PER_IP_SET_UPDATE;
+
         var lists = event.lists.map(function(list) {
            return new List(list.url, list.prefix);
         });
