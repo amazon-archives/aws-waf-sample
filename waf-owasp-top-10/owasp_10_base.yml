@@ -37,7 +37,7 @@ Parameters:
     Default: Regional
   ruleAction:
     Type: String
-    Description: The type of action you want to iplement for the rules in this set. Valid options are COUNT or BLOCK.
+    Description: The type of action you want to implement for the rules in this set. Valid options are COUNT or BLOCK.
     AllowedValues:
       - BLOCK
       - COUNT
